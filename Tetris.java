@@ -11,6 +11,7 @@ public class Tetris extends JFrame {
     private int gameSpeed = 500;
     private final int initialWidth = 800;
     private final int initialHeight = 800;
+    private JLabel[] minilabel = new JLabel[5];
     private int[][] board = new int[20][10];
     private JLabel[][] cellLabels = new JLabel[20][10];
     private int currentX, currentY, rotation = 0;
@@ -156,6 +157,15 @@ public class Tetris extends JFrame {
         gameLabel.setLayout(new GridLayout(20, 10));
         easyLabel.add(gameLabel);
 
+            // 작은 미니 보드 만들기 (5개)
+        for (int i = 0; i < 5; i++) {
+            JLabel miniLabel = new JLabel();
+            miniLabel.setBounds(400, 100 + (i * 120), 100, 100); // 5개의 미니 보드 배치
+            miniLabel.setOpaque(true);
+            miniLabel.setBackground(Color.BLACK);
+            easyLabel.add(miniLabel);
+        }
+
         for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
                 cellLabels[i][j] = new JLabel();
@@ -164,6 +174,8 @@ public class Tetris extends JFrame {
                 gameLabel.add(cellLabels[i][j]);
             }
         }
+
+
 
         getContentPane().add(easyLabel);
         revalidate();
@@ -287,7 +299,6 @@ private void clearBoard() {
         label.setBounds(0, 0, width, height);
     }
 
-    // 키 입력 처리
     private class TetrisKeyListener extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
@@ -317,7 +328,23 @@ private void clearBoard() {
                         drawBlock(rotation);
                     }
                     break;
+                case KeyEvent.VK_Z: // Z키 눌렀을 때, 블록을 바로 아래로 내리기
+                    dropBlockInstantly(); 
+                    break;
             }
+        }
+    
+        // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
+        private void dropBlockInstantly() {
+            // 블록이 더 이상 내려갈 수 없을 때까지 내려보낸다
+            while (canMove(currentX + 1, currentY)) {
+                currentX++; // 아래로 한 칸 내려가기
+                drawBlock(rotation); // 블록을 화면에 그리기
+            }
+    
+            // 블록을 고정시키고, 새로운 블록을 시작
+            fixBlock();
+            startFallingBlock();
         }
     }
 

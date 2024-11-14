@@ -16,7 +16,9 @@ public class Tetris extends JFrame {
     private JLabel[][] cellLabels = new JLabel[20][10];
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
-    private int blockType;
+    private int blockType,nextBlockType;
+    private JLabel nextBlockLabel;
+    
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -158,13 +160,21 @@ public class Tetris extends JFrame {
         easyLabel.add(gameLabel);
 
             // 작은 미니 보드 만들기 (5개)
-        for (int i = 0; i < 5; i++) {
+        for (int i = 1; i < 5; i++) {
             JLabel miniLabel = new JLabel();
             miniLabel.setBounds(400, 100 + (i * 120), 100, 100); // 5개의 미니 보드 배치
             miniLabel.setOpaque(true);
             miniLabel.setBackground(Color.BLACK);
             easyLabel.add(miniLabel);
         }
+
+            // 다음 블럭을 보여줄 4x4 라벨 생성 및 위치 지정
+        nextBlockLabel = new JLabel();
+        nextBlockLabel.setBounds(400, 100, 100, 100);
+        nextBlockLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
+        easyLabel.add(nextBlockLabel);
+
+        
 
         for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
@@ -187,15 +197,55 @@ public class Tetris extends JFrame {
 // 게임 시작 시 블록을 생성
 private void startFallingBlock() {
     Random rand = new Random();
-    blockType = rand.nextInt(SHAPE.length); // 0~6 사이의 난수로 블록 타입 선택
-    rotation = 0; // 기본 회전 상태
-    currentX = 0; // 초기 X 위치 (맨 위에서 시작)
-    currentY = 4; // 초기 Y 위치 (중앙에서 시작)
-    currentColor = getColorForBlock(blockType); // 블록 색 설정
+    blockType = nextBlockType;  // 현재 블록을 다음 블록으로 설정
+    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 설정
+    rotation = 0;
+    currentX = 0; // 초기 X 위치
+    currentY = 3; // 초기 Y 위치
 
-    // 랜덤 블록을 화면에 그리기
+    currentColor = getColorForBlock(blockType);
+
+    // 게임 오버 여부를 체크하여, 오버일 경우 게임을 종료
+    if (isGameOver()) {
+        timer.stop();  // 타이머를 중지해 게임을 중단
+        JOptionPane.showMessageDialog(this, "게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
+        resetGame();  // 게임 초기화
+        return;
+    }
+
+    // 다음 블럭을 미리 보여준다
+    showNextBlock();
+
+    // 새로운 블록을 화면에 그리기
     drawBlock(rotation);
 }
+
+// 다음에 나타날 블럭을 nextBlockLabel에 표시하는 메소드
+private void showNextBlock() {
+    int[][] shape = SHAPE[nextBlockType][0]; // 다음 블럭의 초기 회전 상태
+
+    // nextBlockLabel의 배경을 지운다
+    nextBlockLabel.removeAll();
+    
+    // 다음 블럭의 모양을 nextBlockLabel에 그린다
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            JLabel cell = new JLabel();
+            cell.setOpaque(true);
+            if (shape[i][j] == 1) {
+                cell.setBackground(getColorForBlock(nextBlockType)); // 블럭 색상 적용
+            } else {
+                cell.setBackground(Color.BLACK); // 빈 공간은 검은색
+            }
+            nextBlockLabel.add(cell);
+        }
+    }
+
+    // 변경 사항 적용
+    nextBlockLabel.revalidate();
+    nextBlockLabel.repaint();
+}
+
 
 // 블록을 그리기 전에 화면을 지운다.
 private void drawBlock(int rotation) {
@@ -257,24 +307,67 @@ private boolean canMove(int x, int y) {
     return true; // 모든 조건을 통과하면 이동 가능
 }
 
-// 블록을 고정시키는 메소드 수정
-private void fixBlock() {
-    int[][] shape = SHAPE[blockType][rotation]; // 블록의 모양을 가져옵니다.
+// 블럭 생성 시 고정된 블럭과의 충돌 여부를 체크하여 게임 오버 상태를 결정하는 메소드
+private boolean isGameOver() {
+    int[][] shape = SHAPE[blockType][rotation];
+    for (int i = 0; i < shape.length; i++) {
+        for (int j = 0; j < shape[i].length; j++) {
+            // 블럭이 있는 위치에 고정된 블럭이 있으면 게임 오버
+            if (shape[i][j] == 1 && board[currentX + i][currentY + j] == 1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
+// 블록을 고정시키는 메소드
+private void fixBlock() {
+    int[][] shape = SHAPE[blockType][rotation];
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
             if (shape[i][j] == 1) {
-                // 블록이 고정될 위치에 1을 설정하여 board 배열에 저장
                 board[currentX + i][currentY + j] = 1;
-                // 해당 위치에 블록 색상을 설정
                 cellLabels[currentX + i][currentY + j].setBackground(currentColor);
             }
         }
     }
-
-    // 블록을 고정시킨 후 한 줄을 채운 것이 있는지 확인
     clearFullLines();
 }
+
+// 게임 재시작을 위한 메소드 수정
+private void resetGame() {
+    // 게임 보드 초기화
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 10; j++) {
+            board[i][j] = 0;
+            cellLabels[i][j].setBackground(Color.BLACK); // 보드 색 초기화
+        }
+    }
+
+    // nextBlockLabel 초기화하여 다음 블럭을 보이지 않게 설정
+    if (nextBlockLabel != null) {
+        nextBlockLabel.removeAll();
+        nextBlockLabel.revalidate();
+        nextBlockLabel.repaint();
+    }
+
+    // 메인 화면 (label)으로 돌아가도록 설정
+    getContentPane().removeAll(); // 모든 컴포넌트 제거
+    getContentPane().add(label);  // label을 다시 추가하여 초기 화면으로 전환
+    startButton.setVisible(true); // 게임 시작 버튼 표시
+    exitButton.setVisible(true);  // 종료 버튼 표시
+
+    easyButton.setVisible(false);
+    mediumButton.setVisible(false);
+    hardButton.setVisible(false);
+
+
+
+    revalidate();
+    repaint();
+}
+
 
 // 보드를 초기화하여 화면을 비운다
 private void clearBoard() {

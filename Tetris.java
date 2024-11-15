@@ -11,13 +11,12 @@ public class Tetris extends JFrame {
     private int gameSpeed = 500;
     private final int initialWidth = 800;
     private final int initialHeight = 800;
-    private JLabel[] minilabel = new JLabel[5];
     private int[][] board = new int[20][10];
     private JLabel[][] cellLabels = new JLabel[20][10];
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel;
+    private JLabel nextBlockLabel,holdLabel;
     
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
@@ -159,14 +158,7 @@ public class Tetris extends JFrame {
         gameLabel.setLayout(new GridLayout(20, 10));
         easyLabel.add(gameLabel);
 
-            // 작은 미니 보드 만들기 (5개)
-        for (int i = 1; i < 5; i++) {
-            JLabel miniLabel = new JLabel();
-            miniLabel.setBounds(400, 100 + (i * 120), 100, 100); // 5개의 미니 보드 배치
-            miniLabel.setOpaque(true);
-            miniLabel.setBackground(Color.BLACK);
-            easyLabel.add(miniLabel);
-        }
+
 
             // 다음 블럭을 보여줄 4x4 라벨 생성 및 위치 지정
         nextBlockLabel = new JLabel();
@@ -174,6 +166,16 @@ public class Tetris extends JFrame {
         nextBlockLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
         easyLabel.add(nextBlockLabel);
 
+        
+        holdLabel = new JLabel();
+        holdLabel.setBounds(400, 220, 100, 100);
+        holdLabel.setOpaque(true); // 배경을 보이게 설정
+        holdLabel.setBackground(Color.black); // 디버깅용 배경색 추가
+        holdLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
+        easyLabel.add(holdLabel);
+
+        System.out.println("holdLabel 위치: " + holdLabel.getBounds());
+        System.out.println("easyLabel 크기: " + easyLabel.getBounds());
         
 
         for (int i = 0; i < 20; i++) {

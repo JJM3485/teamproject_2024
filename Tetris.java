@@ -17,6 +17,8 @@ public class Tetris extends JFrame {
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel;
+    private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
+    private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
@@ -173,9 +175,6 @@ public class Tetris extends JFrame {
         holdLabel.setBackground(Color.black); // 디버깅용 배경색 추가
         holdLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
         easyLabel.add(holdLabel);
-
-        System.out.println("holdLabel 위치: " + holdLabel.getBounds());
-        System.out.println("easyLabel 크기: " + easyLabel.getBounds());
         
 
         for (int i = 0; i < 20; i++) {
@@ -187,6 +186,14 @@ public class Tetris extends JFrame {
             }
         }
 
+            // 첫 블록과 다음 블록 설정
+        Random rand = new Random();
+        blockType = rand.nextInt(SHAPE.length);  // 현재 블록 랜덤 생성
+        nextBlockType = rand.nextInt(SHAPE.length);  // 다음 블록 랜덤 생성
+
+        // 다음 블록 표시
+        showNextBlock();
+
 
 
         getContentPane().add(easyLabel);
@@ -196,54 +203,46 @@ public class Tetris extends JFrame {
         startFallingBlock();
     }
 
-// 게임 시작 시 블록을 생성
-private void startFallingBlock() {
-    Random rand = new Random();
-    blockType = nextBlockType;  // 현재 블록을 다음 블록으로 설정
-    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 설정
-    rotation = 0;
-    currentX = 0; // 초기 X 위치
-    currentY = 3; // 초기 Y 위치
-
-    currentColor = getColorForBlock(blockType);
-
-    // 게임 오버 여부를 체크하여, 오버일 경우 게임을 종료
-    if (isGameOver()) {
-        timer.stop();  // 타이머를 중지해 게임을 중단
-        JOptionPane.showMessageDialog(this, "게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
-        resetGame();  // 게임 초기화
-        return;
+    private void startFallingBlock() {
+        rotation = 0;  // 초기 회전 상태
+        currentX = 0;  // 초기 X 위치
+        currentY = 3;  // 초기 Y 위치
+    
+        currentColor = getColorForBlock(blockType);
+    
+        // 게임 오버 여부 확인
+        if (isGameOver()) {
+            timer.stop();
+            JOptionPane.showMessageDialog(this, "게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
+            resetGame();
+            return;
+        }
+    
+        // 현재 블록을 화면에 그림
+        drawBlock(rotation);
     }
-
-    // 다음 블럭을 미리 보여준다
-    showNextBlock();
-
-    // 새로운 블록을 화면에 그리기
-    drawBlock(rotation);
-}
 
 // 다음에 나타날 블럭을 nextBlockLabel에 표시하는 메소드
 private void showNextBlock() {
-    int[][] shape = SHAPE[nextBlockType][0]; // 다음 블럭의 초기 회전 상태
+    nextBlockLabel.removeAll(); // 기존 블록 지우기
 
-    // nextBlockLabel의 배경을 지운다
-    nextBlockLabel.removeAll();
-    
-    // 다음 블럭의 모양을 nextBlockLabel에 그린다
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            JLabel cell = new JLabel();
-            cell.setOpaque(true);
-            if (shape[i][j] == 1) {
-                cell.setBackground(getColorForBlock(nextBlockType)); // 블럭 색상 적용
-            } else {
-                cell.setBackground(Color.BLACK); // 빈 공간은 검은색
+    if (nextBlockType != -1) {
+        int[][] shape = SHAPE[nextBlockType][0]; // 초기 회전 상태
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                JLabel cell = new JLabel();
+                cell.setOpaque(true);
+                if (shape[i][j] == 1) {
+                    cell.setBackground(getColorForBlock(nextBlockType)); // 색상 설정
+                } else {
+                    cell.setBackground(Color.BLACK); // 빈 칸은 검정
+                }
+                nextBlockLabel.add(cell);
             }
-            nextBlockLabel.add(cell);
         }
     }
 
-    // 변경 사항 적용
     nextBlockLabel.revalidate();
     nextBlockLabel.repaint();
 }
@@ -323,7 +322,6 @@ private boolean isGameOver() {
     return false;
 }
 
-// 블록을 고정시키는 메소드
 private void fixBlock() {
     int[][] shape = SHAPE[blockType][rotation];
     for (int i = 0; i < shape.length; i++) {
@@ -334,7 +332,21 @@ private void fixBlock() {
             }
         }
     }
-    clearFullLines();
+    clearFullLines(); // 꽉 찬 줄 제거
+    holdUsed = false; // 홀드 사용 가능 상태 초기화
+
+    // 다음 블록을 현재 블록으로 설정
+    blockType = nextBlockType;
+
+    // 새로운 다음 블록 생성
+    Random rand = new Random();
+    nextBlockType = rand.nextInt(SHAPE.length);
+
+    // 다음 블록을 표시
+    showNextBlock();
+
+    // 새 블록 시작
+    startFallingBlock();
 }
 
 // 게임 재시작을 위한 메소드 수정
@@ -426,7 +438,58 @@ private void clearBoard() {
                 case KeyEvent.VK_Z: // Z키 눌렀을 때, 블록을 바로 아래로 내리기
                     dropBlockInstantly(); 
                     break;
+                case KeyEvent.VK_X:
+                    handleHoldBlock(); // 홀드 블록 기능 처리
+                    break;
             }
+        }
+
+        private void handleHoldBlock() {
+            if (holdUsed) return; // 이미 홀드를 사용한 경우 무시
+        
+            if (holdBlockType == -1) {
+                // 홀드가 비어있을 때: 현재 블록을 저장하고 새 블록 시작
+                holdBlockType = blockType; // 현재 블록 타입 저장
+                startFallingBlock(); // 새로운 블록 시작
+            } else {
+                // 홀드에 블록이 있을 때: 현재 블록과 홀드 블록 교체
+                int temp = blockType;
+                blockType = holdBlockType; // 홀드 블록을 현재 블록으로 설정
+                holdBlockType = temp; // 현재 블록을 홀드에 저장
+                rotation = 0; // 홀드 블록은 기본 회전 상태로 시작
+                currentX = 0; // 초기 위치로 설정
+                currentY = 3; 
+                drawBlock(rotation); // 교체된 블록을 화면에 그리기
+            }
+        
+            // 홀드 표시 업데이트
+            updateHoldLabel();
+        
+            holdUsed = true; // 이번 턴에 홀드를 사용했음을 기록
+        }
+
+        private void updateHoldLabel() {
+            holdLabel.removeAll(); // 기존 블록 제거
+        
+            if (holdBlockType != -1) {
+                int[][] shape = SHAPE[holdBlockType][0]; // 홀드 블록은 기본 회전 상태로 보여줌
+        
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        JLabel cell = new JLabel();
+                        cell.setOpaque(true);
+                        if (shape[i][j] == 1) {
+                            cell.setBackground(getColorForBlock(holdBlockType)); // 블록 색상 설정
+                        } else {
+                            cell.setBackground(Color.BLACK); // 빈 칸은 검은색
+                        }
+                        holdLabel.add(cell);
+                    }
+                }
+            }
+        
+            holdLabel.revalidate();
+            holdLabel.repaint();
         }
     
         // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리

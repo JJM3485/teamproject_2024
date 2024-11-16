@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.swing.*;
 
@@ -16,10 +18,11 @@ public class Tetris extends JFrame {
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel;
+    private JLabel nextBlockLabel,holdLabel,timeLabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
     private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
-    
+    private int remainingTime = 180; // 제한시간 (초 단위, 3분)
+    private Timer countdownTimer;   // 제한시간을 관리하는 타이머
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -126,12 +129,39 @@ public class Tetris extends JFrame {
         label.repaint();
     }
 
-    private void startGame(int speed,int nan) {
+    private void startGame(int speed, int nan) {
         gameSpeed = speed;
         initializeGameBoard(nan);
-
+    
+        // 제한시간 초기화 및 표시
+        remainingTime = 180;
+        timeLabel.setText("남은 시간: 03:00");
+    
+        // 제한시간 타이머 시작
+        startCountdownTimer();
+    
+        // 블록 이동 타이머 시작
         timer = new Timer(gameSpeed, e -> moveBlockDown());
         timer.start();
+    }
+
+    private void startCountdownTimer() {
+        countdownTimer = new Timer(1000, e -> {
+            remainingTime--;
+    
+            // 시간 포맷팅 및 라벨 업데이트
+            int minutes = remainingTime / 60;
+            int seconds = remainingTime % 60;
+            timeLabel.setText(String.format("남은 시간: %02d:%02d", minutes, seconds));
+    
+            if (remainingTime <= 0) {
+                countdownTimer.stop();
+                timer.stop();
+                JOptionPane.showMessageDialog(this, "시간 초과! 게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
+                resetGame(); // 게임 초기화
+            }
+        });
+        countdownTimer.start(); // 타이머 시작
     }
 
     private void initializeGameBoard(int nan) {
@@ -175,6 +205,13 @@ public class Tetris extends JFrame {
         holdLabel.setBackground(Color.black); // 디버깅용 배경색 추가
         holdLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
         easyLabel.add(holdLabel);
+
+        timeLabel = new JLabel("남은 시간: 03:00");
+        timeLabel.setBounds(400, 340, 100, 100); // 위치와 크기 설정
+        timeLabel.setForeground(Color.WHITE); // 글자 색상 설정
+        timeLabel.setOpaque(true); // 배경을 보이게 설정
+        timeLabel.setBackground(Color.black); // 디버깅용 배경색 추가
+        easyLabel.add(timeLabel);
         
 
         for (int i = 0; i < 20; i++) {
@@ -351,6 +388,21 @@ private void fixBlock() {
 
 // 게임 재시작을 위한 메소드 수정
 private void resetGame() {
+    // 제한시간 초기화
+    remainingTime = 180;
+
+    // 제한시간 타이머 중지
+    if (countdownTimer != null) {
+        countdownTimer.stop();
+        countdownTimer = null; // 이전 타이머 해제
+    }
+
+    // 게임 타이머 중지
+    if (timer != null) {
+        timer.stop();
+        timer = null; // 이전 타이머 해제
+    }
+
     // 게임 보드 초기화
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 10; j++) {
@@ -359,24 +411,22 @@ private void resetGame() {
         }
     }
 
-    // nextBlockLabel 초기화하여 다음 블럭을 보이지 않게 설정
+    // 다음 블록 라벨 초기화
     if (nextBlockLabel != null) {
         nextBlockLabel.removeAll();
         nextBlockLabel.revalidate();
         nextBlockLabel.repaint();
     }
 
-    // 메인 화면 (label)으로 돌아가도록 설정
-    getContentPane().removeAll(); // 모든 컴포넌트 제거
-    getContentPane().add(label);  // label을 다시 추가하여 초기 화면으로 전환
-    startButton.setVisible(true); // 게임 시작 버튼 표시
-    exitButton.setVisible(true);  // 종료 버튼 표시
+    // 메인 화면으로 돌아가기
+    getContentPane().removeAll();
+    getContentPane().add(label);
+    startButton.setVisible(true);
+    exitButton.setVisible(true);
 
-    easyButton.setVisible(false);
-    mediumButton.setVisible(false);
-    hardButton.setVisible(false);
-
-
+    if (easyButton != null) easyButton.setVisible(false);
+    if (mediumButton != null) mediumButton.setVisible(false);
+    if (hardButton != null) hardButton.setVisible(false);
 
     revalidate();
     repaint();
@@ -430,9 +480,9 @@ private void clearBoard() {
                     break;
                 case KeyEvent.VK_UP: // 블록 회전
                     int nextRotation = (rotation + 1) % 4;
-                    if (canMove(currentX, currentY)) { // 회전 후 이동할 수 있는지 체크
-                        rotation = nextRotation; // 이동 가능하면 회전 적용
-                        drawBlock(rotation);
+                    if (canRotate(nextRotation)) { // 회전 후 이동 가능 여부 확인
+                        rotation = nextRotation;  // 이동 가능하면 회전 적용
+                        drawBlock(rotation);      // 화면에 새 상태 그리기
                     }
                     break;
                 case KeyEvent.VK_Z: // Z키 눌렀을 때, 블록을 바로 아래로 내리기
@@ -466,6 +516,24 @@ private void clearBoard() {
             updateHoldLabel();
         
             holdUsed = true; // 이번 턴에 홀드를 사용했음을 기록
+        }
+        private boolean canRotate(int nextRotation) {
+            int[][] shape = SHAPE[blockType][nextRotation]; // 회전 후의 블록 모양 가져오기
+        
+            for (int i = 0; i < shape.length; i++) {
+                for (int j = 0; j < shape[i].length; j++) {
+                    if (shape[i][j] == 1) {
+                        int newX = currentX + i;
+                        int newY = currentY + j;
+        
+                        // 경계를 벗어나거나 고정된 블록과 충돌하는지 확인
+                        if (newX < 0 || newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true; // 회전 가능하면 true 반환
         }
 
         private void updateHoldLabel() {
@@ -508,22 +576,30 @@ private void clearBoard() {
 
     // 한 줄이 다 채워졌는지 확인하고, 채워졌으면 그 줄을 지우고 위의 줄을 내린다.
 private void clearFullLines() {
-    for (int i = 19; i >= 0; i--) {  // 아래에서부터 위로 확인
+    List<Integer> fullLines = new ArrayList<>(); // 꽉 찬 줄의 인덱스 저장
+
+    // 모든 줄을 검사하여 꽉 찬 줄을 기록
+    for (int i = 0; i < 20; i++) {
         boolean fullLine = true;
-        
-        // 해당 줄이 꽉 찼는지 확인
         for (int j = 0; j < 10; j++) {
             if (board[i][j] == 0) {
                 fullLine = false;
                 break;
             }
         }
-
         if (fullLine) {
-            // 꽉 찬 줄은 삭제하고, 나머지 줄을 내린다
-            removeLine(i);
-            moveDownFullLines(i);
+            fullLines.add(i);
         }
+    }
+
+    // 기록된 줄을 지우고 위의 줄을 내린다
+    for (int row : fullLines) {
+        removeLine(row); // 해당 줄을 제거
+    }
+
+    // 위의 줄을 아래로 내린다
+    for (int row : fullLines) {
+        moveDownFullLines(row);
     }
 }
 
@@ -537,16 +613,15 @@ private void removeLine(int row) {
 }
 
 // 해당 줄 위에 있는 줄들을 한 칸씩 아래로 내린다.
+// 줄을 아래로 내리는 로직 수정
 private void moveDownFullLines(int row) {
     for (int i = row - 1; i >= 0; i--) {
         for (int j = 0; j < 10; j++) {
-            board[i + 1][j] = board[i][j];  // 줄을 내린다
-            if (board[i][j] == 1) {
-                cellLabels[i + 1][j].setBackground(cellLabels[i][j].getBackground());  // 색상도 내린다
-            } else {
-                cellLabels[i + 1][j].setBackground(Color.BLACK);  // 빈 공간은 검은색으로 만든다
-            }
-            board[i][j] = 0;
+            board[i + 1][j] = board[i][j]; // 위의 줄을 아래로 복사
+            cellLabels[i + 1][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
+
+            board[i][j] = 0; // 위의 줄은 초기화
+            cellLabels[i][j].setBackground(Color.BLACK);
         }
     }
 }

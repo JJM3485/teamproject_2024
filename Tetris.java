@@ -18,11 +18,12 @@ public class Tetris extends JFrame {
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel,timeLabel;
+    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
     private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
+    private int totalBlocks = 100,clearedBlocks = 0; // 전체 블록 수
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -212,6 +213,14 @@ public class Tetris extends JFrame {
         timeLabel.setOpaque(true); // 배경을 보이게 설정
         timeLabel.setBackground(Color.black); // 디버깅용 배경색 추가
         easyLabel.add(timeLabel);
+
+            // 현재 진행 상황을 표시할 라벨 추가
+        progressLabel = new JLabel(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
+        progressLabel.setBounds(400, 460, 200, 50);
+        progressLabel.setForeground(Color.WHITE); // 글자 색상 설정
+        progressLabel.setOpaque(true); // 배경을 보이게 설정
+        progressLabel.setBackground(Color.BLACK);
+        easyLabel.add(progressLabel);
         
 
         for (int i = 0; i < 20; i++) {
@@ -372,6 +381,19 @@ private void fixBlock() {
     clearFullLines(); // 꽉 찬 줄 제거
     holdUsed = false; // 홀드 사용 가능 상태 초기화
 
+    // 블록 카운트 증가
+    clearedBlocks++;
+    updateProgress();
+
+    // 블록 개수가 100개에 도달하면 게임 클리어 처리
+    if (clearedBlocks >= totalBlocks) {
+        timer.stop();
+        countdownTimer.stop();
+        JOptionPane.showMessageDialog(this, "축하합니다! 모든 블록을 클리어했습니다!", "게임 클리어", JOptionPane.INFORMATION_MESSAGE);
+        resetGame();
+        return;
+    }
+
     // 다음 블록을 현재 블록으로 설정
     blockType = nextBlockType;
 
@@ -384,6 +406,11 @@ private void fixBlock() {
 
     // 새 블록 시작
     startFallingBlock();
+}
+
+// 진행 상황 라벨 업데이트
+private void updateProgress() {
+    progressLabel.setText(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
 }
 
 // 게임 재시작을 위한 메소드 수정

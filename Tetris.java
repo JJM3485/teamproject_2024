@@ -231,6 +231,9 @@ public class Tetris extends JFrame {
                 gameLabel.add(cellLabels[i][j]);
             }
         }
+        
+        clearedBlocks=0;
+        progressLabel.setText(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
 
             // 첫 블록과 다음 블록 설정
         Random rand = new Random();

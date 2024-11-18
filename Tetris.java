@@ -18,7 +18,7 @@ public class Tetris extends JFrame {
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel;
+    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
     private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
@@ -215,12 +215,19 @@ public class Tetris extends JFrame {
         easyLabel.add(timeLabel);
 
             // 현재 진행 상황을 표시할 라벨 추가
-        progressLabel = new JLabel(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
-        progressLabel.setBounds(400, 460, 200, 50);
+        progressLabel = new JLabel(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
+        progressLabel.setBounds(400, 460, 100, 50);
         progressLabel.setForeground(Color.WHITE); // 글자 색상 설정
         progressLabel.setOpaque(true); // 배경을 보이게 설정
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
+
+        chlabel = new JLabel("캐릭터 삽입을 위한 라벨입니다.");
+        chlabel.setBounds(550, 200, 200, 500); // 위치와 크기 설정
+        chlabel.setForeground(Color.WHITE); // 글자 색상 설정
+        chlabel.setOpaque(true); // 배경을 보이게 설정
+        chlabel.setBackground(Color.black); // 디버깅용 배경색 추가
+        easyLabel.add(chlabel);
         
 
         for (int i = 0; i < 20; i++) {
@@ -231,9 +238,9 @@ public class Tetris extends JFrame {
                 gameLabel.add(cellLabels[i][j]);
             }
         }
-        
+
         clearedBlocks=0;
-        progressLabel.setText(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
+        progressLabel.setText(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
 
             // 첫 블록과 다음 블록 설정
         Random rand = new Random();
@@ -413,7 +420,7 @@ private void fixBlock() {
 
 // 진행 상황 라벨 업데이트
 private void updateProgress() {
-    progressLabel.setText(String.format("클리어한 블록: %d / %d", clearedBlocks, totalBlocks));
+    progressLabel.setText(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
 }
 
 // 게임 재시작을 위한 메소드 수정

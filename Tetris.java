@@ -24,6 +24,7 @@ public class Tetris extends JFrame {
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 100,clearedBlocks = 0; // 전체 블록 수
+    private int currentDifficulty; // 1: 하, 2: 중, 3: 상
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -130,9 +131,10 @@ public class Tetris extends JFrame {
         label.repaint();
     }
 
-    private void startGame(int speed, int nan) {
+    private void startGame(int speed, int difficulty) {
         gameSpeed = speed;
-        initializeGameBoard(nan);
+        currentDifficulty = difficulty; // 현재 난이도 저장
+        initializeGameBoard(difficulty);
     
         // 제한시간 초기화 및 표시
         remainingTime = 180;

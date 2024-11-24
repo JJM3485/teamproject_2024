@@ -8,9 +8,9 @@ import javax.swing.*;
 public class Tetris extends JFrame {
     private JLabel label, gameLabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
-    private ImageIcon originalIcon, easyIcon;
+    private ImageIcon originalIcon, easyIcon,chIcon;
     private Timer timer;
-    private int gameSpeed = 500;
+    private int gameSpeed = 500, a1 = 0;
     private final int initialWidth = 800;
     private final int initialHeight = 800;
     private int[][] board = new int[20][10];
@@ -25,6 +25,17 @@ public class Tetris extends JFrame {
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 100,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
+    private String selectedCharacter = ""; // 선택된 캐릭터
+    private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
+    private String[] imagePaths = {
+            "images/ch/man_1.png",
+            "images/ch/man_2.png",
+            "images/ch/woman_1.png",
+            "images/ch/woman_2.png",
+            "images/ch/slime.png"
+    };
+
+
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -113,15 +124,15 @@ public class Tetris extends JFrame {
 
         easyButton = new JButton("난이도 하");
         easyButton.setBounds(350, 400, 100, 50);
-        easyButton.addActionListener(e -> startGame(500,1));
+        easyButton.addActionListener(e -> showCharacterSelection(500, 1));
 
         mediumButton = new JButton("난이도 중");
         mediumButton.setBounds(350, 470, 100, 50);
-        mediumButton.addActionListener(e -> startGame(300,2));
+        mediumButton.addActionListener(e -> showCharacterSelection(300, 2));
 
         hardButton = new JButton("난이도 상");
         hardButton.setBounds(350, 540, 100, 50);
-        hardButton.addActionListener(e -> startGame(100,3));
+        hardButton.addActionListener(e -> showCharacterSelection(100, 3));
 
         label.add(easyButton);
         label.add(mediumButton);
@@ -131,10 +142,118 @@ public class Tetris extends JFrame {
         label.repaint();
     }
 
-    private void startGame(int speed, int difficulty) {
+    private void showCharacterSelection(int speed, int difficulty) {
+        gameSpeed = speed;
+        currentDifficulty = difficulty;
+    
+        getContentPane().removeAll(); // 기존 UI 제거
+        revalidate();
+        repaint();
+    
+
+        JPanel charSelectionPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g); // 기존의 컴포넌트 그리기
+    
+                // 배경 이미지 그리기
+                ImageIcon backgroundImage = new ImageIcon("images/select.png");
+                g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+    
+        charSelectionPanel.setLayout(null);
+        charSelectionPanel.setBounds(0, 0, getWidth(), getHeight());
+    
+        JLabel charLabel = new JLabel("캐릭터를 선택하세요!");
+        charLabel.setBounds(300, 50, 200, 50);
+        charLabel.setForeground(Color.WHITE);
+        charLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        charSelectionPanel.add(charLabel);
+    
+        JLabel charImageLabel = new JLabel();
+        charImageLabel.setBounds(50, 150, 370, 400);
+        charImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        charImageLabel.setVerticalAlignment(SwingConstants.CENTER);
+        charSelectionPanel.add(charImageLabel);
+    
+        JLabel charDescLabel = new JLabel();
+        charDescLabel.setBounds(500, 150, 200, 20);
+        charDescLabel.setForeground(Color.WHITE);
+        charDescLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        charSelectionPanel.add(charDescLabel);
+    
+        // 새로운 설명을 표시할 라벨 추가
+        JLabel descriptionLabel = new JLabel("");
+        descriptionLabel.setBounds(430, 180, 400, 500); // 설명 위치 및 크기 조정
+        descriptionLabel.setForeground(Color.WHITE);
+        descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
+        charSelectionPanel.add(descriptionLabel);
+    
+        // 각 캐릭터 설명 준비 (배열에 캐릭터 설명 추가)
+        String[] characterDescriptions = {
+            "직업: 검성(Blade Master) / 왕국의 기사\n\n나이: 24세\n\n출신지: 루멘테르 왕국의 수도, 크라운스피어(Crownspear)\n\n역할: 파티장, 주 공격수, 전략의 중심\n\n루멘테르 왕국 출신의 기사로, 정의와 명예를 중시합니다.\n\n어릴 때부터 빛의 신 루멘의 가르침을 받았으며,\n 에테르 기사단의 마지막 계승자로서 \n조상 대대로 전해내려온 성검을 지니고\n 사명을 지니고 있습니다.\n\n냉철하지만 팀원들을 아끼며 책임감이 강합니다.",
+        
+            "직업: 성기사 (Paladin)\n\n나이: 29세\n\n출신지: 루멘테르 왕국의 외곽 마을, 실바린(Silvarin)\n\n역할: 파티의 탱커 및 정신적 지주\n\n레온은 루멘테르 왕국의 외곽 농촌 마을에서 태어나\n 어린 시절부터 착하고 강인한 성격으로\n 동네 사람들에게 존경받았습니다.\n\n 그의 마을은 마족의 습격을 받아\n 거의 전멸했지만,\n 레온은 홀로 마을을 지키기 위해 싸우다\n 루멘 신전의 성기사단에 의해 구출됩니다.",
+        
+            "직업: 원소 마법사(Elemental Mage) / 화염 전문가\n\n나이: 24세\n\n출신지: 아르카디아의 외곽 마을, 에텔로스(Ethelos)\n\n역할: 강력한 마법 딜러, 전략적인 제압 스페셜리스트\n\n셀레나는 평화로운 에텔로스 마을에서 태어났지만,\n\n 그녀가 8살이 되던 해,\n 마을은 정체불명의 마족의 습격으로 전멸당했습니다.\n 그녀는 화염 속에서 기적적으로 살아남았으며,\n 이후 자신의 내면에\n 원소 마법의 재능이 깃들어 있다는 것을 알게 되었습니다.\n\n 그녀의 고향이 불타오르는 장면은 셀레나의 트라우마이지만,\n 동시에 그녀의 가장 큰 힘의 원천이기도 합니다.",
+        
+            "직업: 성녀 (Saint) / 치유와 축복의 사제\n\n나이: 19세\n\n출신지: 신성 제국, 일루미네르 수도\n\n역할: 치유와 보호, 파티의 정신적 지주\n\n루미엘은 태어날 때부터 \n신성한 빛에 선택받은 축복받은 아이로,\n 일루미네르 성당에서 자랐습니다.\n 그녀의 부모는 이름 없는 농민이었지만,\n 그녀가 태어난 날 밤 \n하늘에 빛나는 성운이 나타나\n 그녀의 신성한 운명을 예고했습니다.\n\n 어린 시절부터 치유의 기적을 보여준\n 그녀는 신성 제국의 주목을 받았고,\n 성녀로서 수련을 받게 되었습니다.\n\n 그러나 그녀는 \n단순히 신성한 역할에 만족하지 않고,\n 자신의 힘으로 사람들을 진정으로 돕고 싶어했습니다.",
+        
+            "종족: 마법 슬라임\n\n성별: 없음 \n(하지만 모든 파티원이 각각 다르게 부릅니다. \n루미엘은 '그 아이', \n셀레나는 '얘', \n레온은 '녀석', \n에린은 '슬리'로 부름.)\n\n나이: 추정 불가 (외관상 아기처럼 보임)\n\n출신지: 불명의 고대 유적 (마법으로 태어난 존재)\n\n역할: 파티의 귀여운 마스코트이자, \n서포터 겸 의외의 전투원\n\n슬리는 원래 고대 유적지에서 잠들어 있던 존재로,\n 루미엘이 처음으로 발견했습니다.\n\n 유적의 신성한 에너지가 반응하며 \n슬라임이 생명체로 깨어났고,\n 파티원들과 함께 행동하기 시작했습니다."
+        };
+    
+        int x = 60;
+        for (int i = 0; i < characters.length; i++) {
+            final int index = i;  // i를 final 변수로 캡처
+        
+            String character = characters[i];
+            String imagePath = imagePaths[i];
+        
+            JButton button = new JButton(character);
+            button.setBounds(x + i * 30, 600, 120, 50);
+            button.addActionListener(e -> {
+                selectedCharacter = character;
+                charImageLabel.setIcon(scaleImageToLabel(new ImageIcon(imagePath), charImageLabel));
+                charDescLabel.setText(character); // 캐릭터 이름 변경
+                descriptionLabel.setText("<html>" + characterDescriptions[index].replace("\n", "<br>") + "</html>"); // 캐릭터 설명 변경
+            });
+            charSelectionPanel.add(button);
+            x += 120;
+        }
+    
+        JButton confirmButton = new JButton("확인");
+        confirmButton.setBounds(350, 680, 100, 50);
+        confirmButton.addActionListener(e -> {
+            if (!selectedCharacter.isEmpty()) {
+                JOptionPane.showMessageDialog(this, selectedCharacter + "로 게임을 시작합니다!", "캐릭터 선택 완료", JOptionPane.INFORMATION_MESSAGE);
+                //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리"
+                startGame(speed, difficulty,selectedCharacter);
+            } else {
+                JOptionPane.showMessageDialog(this, "캐릭터를 선택해주세요!", "오류", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+        charSelectionPanel.add(confirmButton);
+    
+        getContentPane().add(charSelectionPanel);
+        revalidate();
+        repaint();
+    }
+    
+    // 이미지 크기를 라벨 크기에 맞게 조정하는 메서드
+    private ImageIcon scaleImageToLabel(ImageIcon icon, JLabel label) {
+        Image img = icon.getImage();
+        int width = label.getWidth();
+        int height = label.getHeight();
+        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 조정
+        return new ImageIcon(scaledImg);
+    }
+
+    private void startGame(int speed, int difficulty, String selectedCharacter) {
         gameSpeed = speed;
         currentDifficulty = difficulty; // 현재 난이도 저장
-        initializeGameBoard(difficulty);
+        initializeGameBoard(difficulty,selectedCharacter);
     
         // 제한시간 초기화 및 표시
         remainingTime = 180;
@@ -167,20 +286,26 @@ public class Tetris extends JFrame {
         countdownTimer.start(); // 타이머 시작
     }
 
-    private void initializeGameBoard(int nan) {
+    private void initializeGameBoard(int difficulty,String selectedCharacter) {
         getContentPane().removeAll();
         revalidate();
         repaint();
 
-        if (nan == 1) {
+        if (difficulty == 1) {
             easyIcon = new ImageIcon("images/easy.jpg");
         }
-        else if (nan == 2) {
+        else if (difficulty == 2) {
             easyIcon = new ImageIcon("images/normal.jpg");
         }
-        else if (nan == 3) {
+        else if (difficulty == 3) {
             easyIcon = new ImageIcon("images/hard.jpg");
         }
+        //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리" chIcon
+        if (selectedCharacter.equals("에린 카르테스")) {chIcon = new ImageIcon("images/ch/man_1.png");}
+        else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png");}
+        else if (selectedCharacter.equals("셀레나")) {chIcon = new ImageIcon("images/ch/woman_1.png");}
+        else if (selectedCharacter.equals("루미엘")) {chIcon = new ImageIcon("images/ch/woman_2.png");}
+        else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png");}
 
         JLabel easyLabel = new JLabel(easyIcon);
         easyLabel.setLayout(null);
@@ -224,11 +349,19 @@ public class Tetris extends JFrame {
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
 
-        chlabel = new JLabel("캐릭터 삽입을 위한 라벨입니다.");
+        // 캐릭터 이미지 라벨 생성 및 크기 조정
+        chlabel = new JLabel(chIcon);
         chlabel.setBounds(550, 200, 200, 500); // 위치와 크기 설정
         chlabel.setForeground(Color.WHITE); // 글자 색상 설정
-        chlabel.setOpaque(true); // 배경을 보이게 설정
-        chlabel.setBackground(Color.black); // 디버깅용 배경색 추가
+        chlabel.setOpaque(false); // 배경을 보이게 설정
+        // 이미지 크기를 라벨 크기에 맞게 조정
+        Image img = chIcon.getImage();
+        int width = chlabel.getWidth();
+        int height = chlabel.getHeight();
+        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
+        chIcon = new ImageIcon(scaledImg);  // 크기 조정된 이미지를 다시 chIcon에 저장
+        chlabel.setIcon(chIcon); // 크기 조정된 이미지를 라벨에 적용
+
         easyLabel.add(chlabel);
         
 

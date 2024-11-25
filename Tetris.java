@@ -10,6 +10,7 @@ public class Tetris extends JFrame {
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
     private ImageIcon originalIcon, easyIcon,chIcon,abIcon;
     private Timer timer;
+    private boolean isEasyCleared = false,isMediumCleared = false,isHardCleared = false;
     private int gameSpeed = 500, a1 = 0;
     private final int initialWidth = 800;
     private final int initialHeight = 800;
@@ -23,7 +24,7 @@ public class Tetris extends JFrame {
     private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 10,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -286,6 +287,7 @@ public class Tetris extends JFrame {
     }
 
     private void initializeGameBoard(int difficulty,String selectedCharacter) {
+        currentDifficulty = difficulty;
         getContentPane().removeAll();
         revalidate();
         repaint();
@@ -546,6 +548,7 @@ private void fixBlock() {
     if (clearedBlocks >= totalBlocks) {
         timer.stop();
         countdownTimer.stop();
+        handleRewards(currentDifficulty); // 난이도별 보상 지급
         JOptionPane.showMessageDialog(this, "축하합니다! 모든 블록을 클리어했습니다!", "게임 클리어", JOptionPane.INFORMATION_MESSAGE);
         //칭호와 재화 기능을 넣어야 한다. 
         resetGame();
@@ -617,6 +620,24 @@ private void resetGame() {
     repaint();
 }
 
+private void handleRewards(int difficulty) {
+    if (difficulty == 1 && !isEasyCleared) {
+        isEasyCleared = true;
+        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 10000, 정수: 250\n 칭호 : <하의 정복자>", "Easy 보상", JOptionPane.INFORMATION_MESSAGE);
+    } else if (difficulty == 2 && !isMediumCleared) {
+        isMediumCleared = true;
+        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 20000, 정수: 500\n 칭호 : <중의 정복자>", "Medium 보상", JOptionPane.INFORMATION_MESSAGE);
+    } else if (difficulty == 3 && !isHardCleared) {
+        isHardCleared = true;
+        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 30000, 정수: 750\n 칭호 : <상의 정복자>", "Hard 보상", JOptionPane.INFORMATION_MESSAGE);
+    } else {
+        JOptionPane.showMessageDialog(this, "이미 클리어한 난이도입니다. 보상이 지급되지 않습니다.", "알림", JOptionPane.WARNING_MESSAGE);
+    }
+
+    if (isEasyCleared && isMediumCleared && isHardCleared) {
+        JOptionPane.showMessageDialog(this, "축하합니다! 모든 난이도를 정복했습니다! 칭호: '완전한 정복자'", "정복자 칭호", JOptionPane.INFORMATION_MESSAGE);
+    }
+}
 
 // 보드를 초기화하여 화면을 비운다
 private void clearBoard() {

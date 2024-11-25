@@ -6,7 +6,7 @@ import java.util.Random;
 import javax.swing.*;
 
 public class Tetris extends JFrame {
-    private JLabel label, gameLabel;
+    private JLabel label, gameLabel, easyLabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
     private ImageIcon originalIcon, easyIcon,chIcon,abIcon;
     private Timer timer;
@@ -306,7 +306,7 @@ public class Tetris extends JFrame {
         else if (selectedCharacter.equals("루미엘")) {chIcon = new ImageIcon("images/ch/woman_2.png"); abIcon = new ImageIcon("images/ability/cross.png");}
         else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png"); abIcon = new ImageIcon("images/ability/red_slime.png");}
 
-        JLabel easyLabel = new JLabel(easyIcon);
+        easyLabel = new JLabel(easyIcon);
         easyLabel.setLayout(null);
         easyLabel.setBounds(0, 0, getWidth(), getHeight());
 
@@ -684,11 +684,11 @@ private void clearBoard() {
                     break;
             }
         }
-        private void erin() {}
-        private void reon() {}
-        private void serena() {}
+        private void erin() {abilitylabel.setVisible(false);} 
+        private void reon() {abilitylabel.setVisible(false);}
+        private void serena() {abilitylabel.setVisible(false);}
         private void ruminel() {}
-        private void sily() {}
+        private void sily() {abilitylabel.setVisible(false);}
 
         private void handleHoldBlock() {
             if (holdUsed) return; // 이미 홀드를 사용한 경우 무시

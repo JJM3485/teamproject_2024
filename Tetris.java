@@ -8,7 +8,7 @@ import javax.swing.*;
 public class Tetris extends JFrame {
     private JLabel label, gameLabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
-    private ImageIcon originalIcon, easyIcon,chIcon;
+    private ImageIcon originalIcon, easyIcon,chIcon,abIcon;
     private Timer timer;
     private int gameSpeed = 500, a1 = 0;
     private final int initialWidth = 800;
@@ -299,12 +299,12 @@ public class Tetris extends JFrame {
         else if (difficulty == 3) {
             easyIcon = new ImageIcon("images/hard.jpg");
         }
-        //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리" chIcon
-        if (selectedCharacter.equals("에린 카르테스")) {chIcon = new ImageIcon("images/ch/man_1.png");}
-        else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png");}
-        else if (selectedCharacter.equals("셀레나")) {chIcon = new ImageIcon("images/ch/woman_1.png");}
-        else if (selectedCharacter.equals("루미엘")) {chIcon = new ImageIcon("images/ch/woman_2.png");}
-        else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png");}
+        //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리" chIcon abIcon
+        if (selectedCharacter.equals("에린 카르테스")) {chIcon = new ImageIcon("images/ch/man_1.png"); abIcon = new ImageIcon("images/ability/sword.png");}
+        else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png"); abIcon = new ImageIcon("images/ability/shield.png");}
+        else if (selectedCharacter.equals("셀레나")) {chIcon = new ImageIcon("images/ch/woman_1.png"); abIcon = new ImageIcon("images/ability/fire.png");}
+        else if (selectedCharacter.equals("루미엘")) {chIcon = new ImageIcon("images/ch/woman_2.png"); abIcon = new ImageIcon("images/ability/cross.png");}
+        else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png"); abIcon = new ImageIcon("images/ability/red_slime.png");}
 
         JLabel easyLabel = new JLabel(easyIcon);
         easyLabel.setLayout(null);
@@ -348,18 +348,23 @@ public class Tetris extends JFrame {
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
         
-        //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.
-        abilitylabel = new JLabel("능력 이미지");
-        abilitylabel.setBounds(550, 130, 100, 50);
-        abilitylabel.setForeground(Color.WHITE); // 글자 색상 설정
-        abilitylabel.setOpaque(true); // 배경을 보이게 설정
-        abilitylabel.setBackground(Color.BLACK);
+        //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.abIcon ability label 550, 130, 100, 50
+        abilitylabel = new JLabel(abIcon);
+        abilitylabel.setBounds(550, 130, 100, 50); // 위치와 크기 설정
+        abilitylabel.setOpaque(false); // 배경을 보이게 설정
+        // 이미지 크기를 라벨 크기에 맞게 조정
+        Image abimg = abIcon.getImage();
+        int abwidth = abilitylabel.getWidth();
+        int abheight = abilitylabel.getHeight();
+        Image abscaledImg = abimg.getScaledInstance(abwidth, abheight, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
+        abIcon = new ImageIcon(abscaledImg);  // 크기 조정된 이미지를 다시 chIcon에 저장
+        abilitylabel.setIcon(abIcon); // 크기 조정된 이미지를 라벨에 적용
+
         easyLabel.add(abilitylabel);
 
         // 캐릭터 이미지 라벨 생성 및 크기 조정
         chlabel = new JLabel(chIcon);
         chlabel.setBounds(550, 200, 200, 500); // 위치와 크기 설정
-        chlabel.setForeground(Color.WHITE); // 글자 색상 설정
         chlabel.setOpaque(false); // 배경을 보이게 설정
         // 이미지 크기를 라벨 크기에 맞게 조정
         Image img = chIcon.getImage();

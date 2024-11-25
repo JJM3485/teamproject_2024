@@ -542,11 +542,12 @@ private void fixBlock() {
     clearedBlocks++;
     updateProgress();
 
-    // 블록 개수가 100개에 도달하면 게임 클리어 처리
+    // 블록 개수가 80개에 도달하면 게임 클리어 처리
     if (clearedBlocks >= totalBlocks) {
         timer.stop();
         countdownTimer.stop();
         JOptionPane.showMessageDialog(this, "축하합니다! 모든 블록을 클리어했습니다!", "게임 클리어", JOptionPane.INFORMATION_MESSAGE);
+        //칭호와 재화 기능을 넣어야 한다. 
         resetGame();
         return;
     }

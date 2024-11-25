@@ -124,11 +124,11 @@ public class Tetris extends JFrame {
 
         easyButton = new JButton("난이도 하");
         easyButton.setBounds(350, 400, 100, 50);
-        easyButton.addActionListener(e -> showCharacterSelection(500, 1));
+        easyButton.addActionListener(e -> showCharacterSelection(300, 1));
 
         mediumButton = new JButton("난이도 중");
         mediumButton.setBounds(350, 470, 100, 50);
-        mediumButton.addActionListener(e -> showCharacterSelection(300, 2));
+        mediumButton.addActionListener(e -> showCharacterSelection(200, 2));
 
         hardButton = new JButton("난이도 상");
         hardButton.setBounds(350, 540, 100, 50);
@@ -409,7 +409,7 @@ public class Tetris extends JFrame {
     private void startFallingBlock() {
         rotation = 0;  // 초기 회전 상태
         currentX = 0;  // 초기 X 위치
-        currentY = 3;  // 초기 Y 위치
+        currentY = 1;  // 초기 Y 위치
     
         currentColor = getColorForBlock(blockType);
     

@@ -18,12 +18,12 @@ public class Tetris extends JFrame {
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel;
+    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
     private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 100,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -228,7 +228,6 @@ public class Tetris extends JFrame {
         confirmButton.addActionListener(e -> {
             if (!selectedCharacter.isEmpty()) {
                 JOptionPane.showMessageDialog(this, selectedCharacter + "로 게임을 시작합니다!", "캐릭터 선택 완료", JOptionPane.INFORMATION_MESSAGE);
-                //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리"
                 startGame(speed, difficulty,selectedCharacter);
             } else {
                 JOptionPane.showMessageDialog(this, "캐릭터를 선택해주세요!", "오류", JOptionPane.WARNING_MESSAGE);
@@ -341,13 +340,21 @@ public class Tetris extends JFrame {
         timeLabel.setBackground(Color.black); // 디버깅용 배경색 추가
         easyLabel.add(timeLabel);
 
-            // 현재 진행 상황을 표시할 라벨 추가
+        // 현재 진행 상황을 표시할 라벨 추가
         progressLabel = new JLabel(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
         progressLabel.setBounds(400, 460, 100, 50);
         progressLabel.setForeground(Color.WHITE); // 글자 색상 설정
         progressLabel.setOpaque(true); // 배경을 보이게 설정
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
+        
+        //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.
+        abilitylabel = new JLabel("능력 이미지");
+        abilitylabel.setBounds(550, 130, 100, 50);
+        abilitylabel.setForeground(Color.WHITE); // 글자 색상 설정
+        abilitylabel.setOpaque(true); // 배경을 보이게 설정
+        abilitylabel.setBackground(Color.BLACK);
+        easyLabel.add(abilitylabel);
 
         // 캐릭터 이미지 라벨 생성 및 크기 조정
         chlabel = new JLabel(chIcon);
@@ -663,8 +670,20 @@ private void clearBoard() {
                 case KeyEvent.VK_X:
                     handleHoldBlock(); // 홀드 블록 기능 처리
                     break;
+                case KeyEvent.VK_C:
+                    if (selectedCharacter.equals("에린 카르테스")) {erin();}
+                    else if (selectedCharacter.equals("레온 하르트")) {reon();}
+                    else if (selectedCharacter.equals("셀레나")) {serena();}
+                    else if (selectedCharacter.equals("루미엘")) {ruminel();}
+                    else if (selectedCharacter.equals("슬리")) {sily();}
+                    break;
             }
         }
+        private void erin() {}
+        private void reon() {}
+        private void serena() {}
+        private void ruminel() {}
+        private void sily() {}
 
         private void handleHoldBlock() {
             if (holdUsed) return; // 이미 홀드를 사용한 경우 무시

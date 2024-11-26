@@ -623,15 +623,15 @@ private void resetGame() {
 private void handleRewards(int difficulty) {
     if (difficulty == 1 && !isEasyCleared) {
         isEasyCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 10000, 정수: 250\n 칭호 : <하의 정복자>", "Easy 보상", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 10000, 정수: 250\n 칭호 : <하의 정복자>", "Easy 보상", JOptionPane.INFORMATION_MESSAGE);
     } else if (difficulty == 2 && !isMediumCleared) {
         isMediumCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 20000, 정수: 500\n 칭호 : <중의 정복자>", "Medium 보상", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 20000, 정수: 500\n 칭호 : <중의 정복자>", "Medium 보상", JOptionPane.INFORMATION_MESSAGE);
     } else if (difficulty == 3 && !isHardCleared) {
         isHardCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! 골드: 30000, 정수: 750\n 칭호 : <상의 정복자>", "Hard 보상", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 30000, 정수: 750\n 칭호 : <상의 정복자>", "Hard 보상", JOptionPane.INFORMATION_MESSAGE);
     } else {
-        JOptionPane.showMessageDialog(this, "이미 클리어한 난이도입니다. 보상이 지급되지 않습니다.", "알림", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, "이미 정복한 난이도입니다. 보상이 지급되지 않습니다.", "알림", JOptionPane.WARNING_MESSAGE);
     }
 
     if (isEasyCleared && isMediumCleared && isHardCleared) {
@@ -718,23 +718,29 @@ private void clearBoard() {
             if (holdBlockType == -1) {
                 // 홀드가 비어있을 때: 현재 블록을 저장하고 새 블록 시작
                 holdBlockType = blockType; // 현재 블록 타입 저장
-                startFallingBlock(); // 새로운 블록 시작
+                blockType = nextBlockType; // 다음 블록으로 교체
+                nextBlockType = new Random().nextInt(SHAPE.length); // 새로운 다음 블록 생성
             } else {
                 // 홀드에 블록이 있을 때: 현재 블록과 홀드 블록 교체
                 int temp = blockType;
                 blockType = holdBlockType; // 홀드 블록을 현재 블록으로 설정
                 holdBlockType = temp; // 현재 블록을 홀드에 저장
-                rotation = 0; // 홀드 블록은 기본 회전 상태로 시작
-                currentX = 0; // 초기 위치로 설정
-                currentY = 3; 
-                drawBlock(rotation); // 교체된 블록을 화면에 그리기
             }
         
-            // 홀드 표시 업데이트
-            updateHoldLabel();
+            rotation = 0; // 홀드 블록은 기본 회전 상태로 시작
+            currentX = 0; // 초기 위치로 설정
+            currentY = 3;
         
-            holdUsed = true; // 이번 턴에 홀드를 사용했음을 기록
+            // 홀드 표시와 다음 블록 라벨 업데이트
+            updateHoldLabel();
+            showNextBlock(); // 다음 블록 갱신
+        
+            holdUsed = true; // 홀드 사용 처리
+        
+            // 새 블록 화면에 표시
+            drawBlock(rotation);
         }
+        
         private boolean canRotate(int nextRotation) {
             int[][] shape = SHAPE[blockType][nextRotation]; // 회전 후의 블록 모양 가져오기
         

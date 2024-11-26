@@ -21,10 +21,10 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 10,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -518,14 +518,19 @@ private boolean isGameOver() {
     int[][] shape = SHAPE[blockType][rotation];
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
-            // 블럭이 있는 위치에 고정된 블럭이 있으면 게임 오버
             if (shape[i][j] == 1 && board[currentX + i][currentY + j] == 1) {
-                return true;
+                // 게임 오버 상태에서 성녀 부활 기능 체크
+                if (selectedCharacter.equals("루미엘") && !revived) {
+                    ruminel(); // 외부 클래스의 메서드 호출
+                    return false; // 게임 오버 방지
+                }
+                return true; // 부활 불가 시 게임 오버
             }
         }
     }
     return false;
 }
+
 
 private void fixBlock() {
     int[][] shape = SHAPE[blockType][rotation];
@@ -578,7 +583,7 @@ private void updateProgress() {
 private void resetGame() {
     // 제한시간 초기화
     remainingTime = 180;
-
+    revived = false;
     // 제한시간 타이머 중지
     if (countdownTimer != null) {
         countdownTimer.stop();
@@ -639,6 +644,52 @@ private void handleRewards(int difficulty) {
     }
 }
 
+private void erin() {abilitylabel.setVisible(false);} 
+private void reon() {abilitylabel.setVisible(false);}
+private void serena() {abilitylabel.setVisible(false);}
+private void ruminel() {
+    if (!revived) { // 부활 가능 여부 확인
+        // 상단 절반 제거
+        for (int i = 0; i < 10; i++) { // 상단 10줄 제거
+            for (int j = 0; j < 10; j++) {
+                board[i][j] = 0; // 보드 데이터 초기화
+                cellLabels[i][j].setBackground(Color.BLACK); // 라벨 색상 초기화
+            }
+        }
+
+        // 하단 절반 유지 (아무 작업도 하지 않음)
+
+        // 능력 라벨 숨기기
+        abilitylabel.setVisible(false);
+
+        // 부활 상태 기록
+        revived = true;
+
+        // UI 갱신
+        revalidate();
+        repaint();
+
+        JOptionPane.showMessageDialog(Tetris.this, "성녀의 부활 능력이 발동되었습니다! 상단 블록이 제거됩니다.", "부활", JOptionPane.INFORMATION_MESSAGE);
+
+        // 새로운 블록 시작
+        startFallingBlock();
+    }
+}
+
+
+
+private void sily() {
+    abilitylabel.setVisible(false); // 기존 능력 관련 레이블 숨김
+
+    // 슬라임 캐릭터 이미지를 red_slime 이미지로 변경
+    ImageIcon redSlimeIcon = new ImageIcon("images/ability/red_slime.png"); // 새로운 이미지 로드
+    Image img = redSlimeIcon.getImage(); // 이미지 객체 가져오기
+    int width = chlabel.getWidth(); // chlabel의 너비 가져오기
+    int height = chlabel.getHeight(); // chlabel의 높이 가져오기
+    Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
+    redSlimeIcon = new ImageIcon(scaledImg); // 조정된 이미지를 다시 아이콘으로 저장
+    chlabel.setIcon(redSlimeIcon); // chlabel의 이미지를 새로운 이미지로 변경
+}
 // 보드를 초기화하여 화면을 비운다
 private void clearBoard() {
     for (int i = 0; i < 20; i++) {
@@ -706,11 +757,6 @@ private void clearBoard() {
                     break;
             }
         }
-        private void erin() {abilitylabel.setVisible(false);} 
-        private void reon() {abilitylabel.setVisible(false);}
-        private void serena() {abilitylabel.setVisible(false);}
-        private void ruminel() {}
-        private void sily() {abilitylabel.setVisible(false);}
 
         private void handleHoldBlock() {
             if (holdUsed) return; // 이미 홀드를 사용한 경우 무시

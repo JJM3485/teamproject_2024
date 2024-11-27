@@ -24,7 +24,7 @@ public class Tetris extends JFrame {
     private boolean holdUsed = false,revived = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 10,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -554,7 +554,6 @@ private void fixBlock() {
         timer.stop();
         countdownTimer.stop();
         handleRewards(currentDifficulty); // 난이도별 보상 지급
-        JOptionPane.showMessageDialog(this, "축하합니다! 모든 블록을 클리어했습니다!", "게임 클리어", JOptionPane.INFORMATION_MESSAGE);
         //칭호와 재화 기능을 넣어야 한다. 
         resetGame();
         return;
@@ -641,6 +640,7 @@ private void handleRewards(int difficulty) {
 
     if (isEasyCleared && isMediumCleared && isHardCleared) {
         JOptionPane.showMessageDialog(this, "축하합니다! 모든 난이도를 정복했습니다! 칭호: '완전한 정복자'", "정복자 칭호", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "에린파티의 서브 스토리가 해금되었습니다.", "스토리 해금", JOptionPane.INFORMATION_MESSAGE);
     }
 }
 

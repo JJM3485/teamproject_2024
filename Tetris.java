@@ -303,10 +303,10 @@ public class Tetris extends JFrame {
         }
         //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리" chIcon abIcon
         if (selectedCharacter.equals("에린 카르테스")) {chIcon = new ImageIcon("images/ch/man_1.png"); abIcon = new ImageIcon("images/ability/sword.png");}
-        else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png"); abIcon = new ImageIcon("images/ability/shield.png");}
+        else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png"); abIcon = new ImageIcon("images/ability/shield_icon.png");}
         else if (selectedCharacter.equals("셀레나")) {chIcon = new ImageIcon("images/ch/woman_1.png"); abIcon = new ImageIcon("images/ability/fire.png");}
         else if (selectedCharacter.equals("루미엘")) {chIcon = new ImageIcon("images/ch/woman_2.png"); abIcon = new ImageIcon("images/ability/cross.png");}
-        else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png"); abIcon = new ImageIcon("images/ability/red_slime.png");}
+        else if (selectedCharacter.equals("슬리")) {chIcon = new ImageIcon("images/ch/slime.png"); abIcon = new ImageIcon("images/ability/red.png");}
 
         easyLabel = new JLabel(easyIcon);
         easyLabel.setLayout(null);
@@ -649,8 +649,8 @@ private void reon() {abilitylabel.setVisible(false);}
 private void serena() {abilitylabel.setVisible(false);}
 private void ruminel() {
     if (!revived) { // 부활 가능 여부 확인
-        // 상단 절반 제거
-        for (int i = 0; i < 10; i++) { // 상단 10줄 제거
+        // 상단 적당히 제거
+        for (int i = 0; i < 15; i++) { // 상단 10줄 제거
             for (int j = 0; j < 10; j++) {
                 board[i][j] = 0; // 보드 데이터 초기화
                 cellLabels[i][j].setBackground(Color.BLACK); // 라벨 색상 초기화

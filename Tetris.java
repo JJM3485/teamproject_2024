@@ -21,7 +21,7 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false,abilityUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
@@ -590,6 +590,7 @@ private void resetGame() {
     // 제한시간 초기화
     remainingTime = 180;
     revived = false;
+    abilityUsed = false; // 레온의 능력 초기화
     // 제한시간 타이머 중지
     if (countdownTimer != null) {
         countdownTimer.stop();
@@ -652,7 +653,79 @@ private void handleRewards(int difficulty) {
 }
 
 private void erin() {abilitylabel.setVisible(false);} 
-private void reon() {abilitylabel.setVisible(false);}
+private void reon() {
+    if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
+
+    // 가장 높은 블록과 낮은 블록의 Y 좌표를 찾기
+    int highestBlock = 19; // 초기값: 가장 낮은 위치
+    int lowestBlock = 0;   // 초기값: 가장 높은 위치
+
+    for (int i = 0; i < 20; i++) { // 위에서부터 검사
+        for (int j = 0; j < 10; j++) {
+            if (board[i][j] == 1) {
+                highestBlock = Math.min(highestBlock, i); // 가장 높은 블록 갱신
+                lowestBlock = Math.max(lowestBlock, i);  // 가장 낮은 블록 갱신
+            }
+        }
+    }
+
+    // 블록의 범위를 확인하여 절반 계산
+    int midRow = (highestBlock + lowestBlock) / 2;
+    if ((highestBlock + lowestBlock) % 2 != 0) midRow++; // 홀수인 경우 올림 처리
+
+    // 하단 절반 제거
+    for (int i = midRow; i <= lowestBlock; i++) {
+        for (int j = 0; j < 10; j++) {
+            board[i][j] = 0; // 데이터 초기화
+            cellLabels[i][j].setBackground(Color.BLACK); // 라벨 초기화
+        }
+    }
+
+    // 상단 블록을 아래로 이동
+    int rowsToMove = lowestBlock - midRow + 1; // 하단 제거된 줄 수 계산
+    for (int i = midRow - 1; i >= 0; i--) {
+        for (int j = 0; j < 10; j++) {
+            board[i + rowsToMove][j] = board[i][j]; // 아래로 이동
+            cellLabels[i + rowsToMove][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
+
+            board[i][j] = 0; // 원래 위치 초기화
+            cellLabels[i][j].setBackground(Color.BLACK);
+        }
+    }
+
+    // 게임 화면 숨기기 (gameLabel)
+    gameLabel.setVisible(false);
+
+    // 방패 이미지를 덮기 위한 JLabel 생성
+    JLabel shieldLabel = new JLabel();
+    shieldLabel.setIcon(new ImageIcon("images/ability/shield_icon.png"));
+    shieldLabel.setBounds(gameLabel.getBounds()); // gameLabel과 같은 위치에 설정
+    shieldLabel.setOpaque(false); // 배경을 투명하게 설정
+
+    // easyLabel에 방패 이미지 추가
+    easyLabel.add(shieldLabel);
+    easyLabel.revalidate(); // 레이아웃 갱신
+    easyLabel.repaint();    // 화면 갱신
+
+    // 항상 0.5초 동안 방패 이미지가 보이도록 설정
+    int shieldTime = 500; // 0.5초 (500ms)
+
+    // 지정된 시간 후 방패 이미지 제거하고 gameLabel 다시 보이게 하기
+    new Timer(shieldTime, e -> {
+        easyLabel.remove(shieldLabel); // 방패 이미지 제거
+        gameLabel.setVisible(true);     // gameLabel 다시 보이게 하기
+        easyLabel.revalidate();         // 레이아웃 갱신
+        easyLabel.repaint();            // 화면 갱신
+    }).start();
+
+    // 능력 발동 후 abilitylabel 숨김
+    abilitylabel.setVisible(false);
+
+    abilityUsed = true; // 능력 사용 처리
+}
+
+
+
 private void serena() {abilitylabel.setVisible(false);}
 private void ruminel() {
     if (!revived) { // 부활 가능 여부 확인

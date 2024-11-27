@@ -19,7 +19,7 @@ public class Tetris extends JFrame {
     private int currentX, currentY, rotation = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel;
+    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
     private boolean holdUsed = false,revived = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
@@ -349,6 +349,13 @@ public class Tetris extends JFrame {
         progressLabel.setOpaque(true); // 배경을 보이게 설정
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
+
+        explainlabel = new JLabel("<html>z : 블록 다운<br>x : 홀딩<br>c : 능력 사용</html>");
+        explainlabel.setBounds(400, 580, 100, 100); // 위치와 크기 설정
+        explainlabel.setForeground(Color.WHITE); // 글자 색상 설정
+        explainlabel.setOpaque(true); // 배경을 보이게 설정
+        explainlabel.setBackground(Color.black); // 디버깅용 배경색 추가
+        easyLabel.add(explainlabel);
         
         //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.abIcon ability label 550, 130, 100, 50
         abilitylabel = new JLabel(abIcon);

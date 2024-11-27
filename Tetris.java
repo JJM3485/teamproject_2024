@@ -24,7 +24,7 @@ public class Tetris extends JFrame {
     private boolean holdUsed = false,revived = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 10,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -350,7 +350,7 @@ public class Tetris extends JFrame {
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
 
-        explainlabel = new JLabel("<html>z : 블록 다운<br>x : 홀딩<br>c : 능력 사용</html>");
+        explainlabel = new JLabel("<html>Z : 블록 다운<br>X : 홀딩<br>C : 능력 사용</html>");
         explainlabel.setBounds(400, 580, 100, 100); // 위치와 크기 설정
         explainlabel.setForeground(Color.WHITE); // 글자 색상 설정
         explainlabel.setOpaque(true); // 배경을 보이게 설정
@@ -676,7 +676,7 @@ private void ruminel() {
         revalidate();
         repaint();
 
-        JOptionPane.showMessageDialog(Tetris.this, "성녀의 부활 능력이 발동되었습니다! 상단 블록이 제거됩니다.", "부활", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(Tetris.this, "성녀의 부활 능력이 발동되었습니다!", "부활", JOptionPane.INFORMATION_MESSAGE);
 
         // 새로운 블록 시작
         startFallingBlock();
@@ -759,7 +759,6 @@ private void clearBoard() {
                     if (selectedCharacter.equals("에린 카르테스")) {erin();}
                     else if (selectedCharacter.equals("레온 하르트")) {reon();}
                     else if (selectedCharacter.equals("셀레나")) {serena();}
-                    else if (selectedCharacter.equals("루미엘")) {ruminel();}
                     else if (selectedCharacter.equals("슬리")) {sily();}
                     break;
             }

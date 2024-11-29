@@ -11,7 +11,7 @@ public class Tetris extends JFrame {
     private ImageIcon originalIcon, easyIcon,chIcon,abIcon;
     private Timer timer;
     private boolean isEasyCleared = false,isMediumCleared = false,isHardCleared = false;
-    private int gameSpeed = 500, a1 = 0;
+    private int gameSpeed = 500;
     private final int initialWidth = 800;
     private final int initialHeight = 800;
     private int[][] board = new int[20][10];
@@ -481,7 +481,7 @@ private Color getColorForBlock(int blockType) {
         case 0: return Color.CYAN;  // I
         case 1: return Color.YELLOW; // O
         case 2: return Color.GREEN;  // S
-        case 3: return Color.RED;    // Z
+        case 3: return Color.DARK_GRAY;    // Z
         case 4: return Color.BLUE;   // L
         case 5: return Color.PINK;   // T
         case 6: return Color.ORANGE; // J
@@ -727,6 +727,8 @@ private void reon() {
 
 
 private void serena() {abilitylabel.setVisible(false);}
+
+
 private void ruminel() {
     if (!revived) { // 부활 가능 여부 확인
         // 상단 적당히 제거

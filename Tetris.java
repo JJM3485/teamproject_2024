@@ -462,32 +462,37 @@ private void showNextBlock() {
 
 // 블록을 그리기 전에 화면을 지운다.
 private void drawBlock(int rotation) {
-    clearBoard(); // 이전 상태 클리어
-    int[][] shape = SHAPE[blockType][rotation]; // 선택된 블록 타입의 모양
+    clearBoard(); // 이전 상태 초기화
+
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1 && currentX + i < 20) {
-                // 현재 블록을 화면에 그린다
+            if (shape[i][j] == 1 && currentX + i < 20 && currentY + j >= 0 && currentY + j < 10) {
                 cellLabels[currentX + i][currentY + j].setBackground(currentColor);
             }
         }
     }
 }
 
+
+
+// 블록 색을 설정하는 메소드
 // 블록 색을 설정하는 메소드
 private Color getColorForBlock(int blockType) {
     switch (blockType) {
         case 0: return Color.CYAN;  // I
         case 1: return Color.YELLOW; // O
         case 2: return Color.GREEN;  // S
-        case 3: return Color.DARK_GRAY;    // Z
+        case 3: return Color.DARK_GRAY; // Z
         case 4: return Color.BLUE;   // L
         case 5: return Color.PINK;   // T
         case 6: return Color.ORANGE; // J
-        default: return Color.WHITE;
+        case -1: return Color.RED;   // 셀레나의 특수 블록
+        default: return Color.WHITE; // 기본 값
     }
 }
+
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
@@ -495,14 +500,15 @@ private void moveBlockDown() {
         currentX++;
         drawBlock(rotation);
     } else {
-        fixBlock();
-        startFallingBlock(); // 새로운 블록을 시작
+        fixBlock(); // 블록 고정
+        startFallingBlock(); // 새로운 블록 시작
     }
 }
 
+
 // 블록 이동 여부 체크
 private boolean canMove(int x, int y) {
-    int[][] shape = SHAPE[blockType][rotation]; // 블록 타입과 회전 상태를 고려한 모양 가져오기
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
@@ -510,15 +516,16 @@ private boolean canMove(int x, int y) {
                 int newX = x + i;
                 int newY = y + j;
 
-                // 벽을 넘어서거나 다른 블록과 충돌하는지 확인
+                // 경계를 벗어나거나 고정된 블록과 충돌하는지 확인
                 if (newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
                     return false;
                 }
             }
         }
     }
-    return true; // 모든 조건을 통과하면 이동 가능
+    return true; // 이동 가능
 }
+
 
 // 블럭 생성 시 고정된 블럭과의 충돌 여부를 체크하여 게임 오버 상태를 결정하는 메소드
 private boolean isGameOver() {
@@ -540,7 +547,8 @@ private boolean isGameOver() {
 
 
 private void fixBlock() {
-    int[][] shape = SHAPE[blockType][rotation];
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
             if (shape[i][j] == 1) {
@@ -549,36 +557,76 @@ private void fixBlock() {
             }
         }
     }
-    clearFullLines(); // 꽉 찬 줄 제거
+
+    // 특수 블록(-1)인 경우 주변 블록 제거 처리
+    if (blockType == -1) {
+        explodeSurroundingBlocks(currentX, currentY); // 주변 블록 처리
+    } else {
+        clearFullLines(); // 일반 블록은 줄 삭제 확인
+    }
+
     holdUsed = false; // 홀드 사용 가능 상태 초기화
 
-    // 블록 카운트 증가
     clearedBlocks++;
     updateProgress();
 
-    // 블록 개수가 80개에 도달하면 게임 클리어 처리
     if (clearedBlocks >= totalBlocks) {
         timer.stop();
         countdownTimer.stop();
-        handleRewards(currentDifficulty); // 난이도별 보상 지급
-        //칭호와 재화 기능을 넣어야 한다. 
+        handleRewards(currentDifficulty);
         resetGame();
         return;
     }
 
-    // 다음 블록을 현재 블록으로 설정
     blockType = nextBlockType;
-
-    // 새로운 다음 블록 생성
     Random rand = new Random();
     nextBlockType = rand.nextInt(SHAPE.length);
 
-    // 다음 블록을 표시
     showNextBlock();
-
-    // 새 블록 시작
     startFallingBlock();
 }
+
+
+private void explodeSurroundingBlocks(int x, int y) {
+    boolean hasSurroundingBlocks = false;
+
+    // 주변 2칸 탐색
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            int newX = x + i;
+            int newY = y + j;
+
+            // 보드 범위 내에서 블록이 있는지 확인
+            if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
+                hasSurroundingBlocks = true;
+                break;
+            }
+        }
+        if (hasSurroundingBlocks) break; // 블록이 있으면 더 이상 탐색하지 않음
+    }
+
+    if (hasSurroundingBlocks) {
+        // 주변 블록 제거
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                int newX = x + i;
+                int newY = y + j;
+
+                // 보드 범위 내에서 블록 제거
+                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
+                    board[newX][newY] = 0; // 데이터 초기화
+                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
+                }
+            }
+        }
+    } 
+
+    // 특수 블록만 제거
+    board[x][y] = 0;
+    cellLabels[x][y].setBackground(Color.BLACK);
+}
+
+
 
 // 진행 상황 라벨 업데이트
 private void updateProgress() {
@@ -723,10 +771,33 @@ private void reon() {
 
     abilityUsed = true; // 능력 사용 처리
 }
+//
 
 
+private void serena() {
+    if (abilityUsed) return; // 능력을 이미 사용했다면 실행하지 않음
 
-private void serena() {abilitylabel.setVisible(false);}
+    // 현재 블록 제거
+    clearBoard(); // 이전 블록 화면 지우기
+
+    // 특수 블록 설정 (1x1 빨간 블록)
+    blockType = -1; // 특수 블록 타입
+    rotation = 0;
+    currentX = 0; // 화면 최상단
+    currentY = 4; // 중앙에서 시작
+    currentColor = Color.RED; // 빨간색 설정
+
+    // 새로운 블록 그리기
+    drawBlock(rotation);
+
+    // 능력 사용 처리
+    abilityUsed = true;
+
+    // 능력 발동 후 abilitylabel 숨김
+    abilitylabel.setVisible(false);
+}
+
+
 
 
 private void ruminel() {

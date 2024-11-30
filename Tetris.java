@@ -484,7 +484,7 @@ private Color getColorForBlock(int blockType) {
         case 0: return Color.CYAN;  // I
         case 1: return Color.YELLOW; // O
         case 2: return Color.GREEN;  // S
-        case 3: return Color.DARK_GRAY; // Z
+        case 3: return Color.GRAY; // Z
         case 4: return Color.BLUE;   // L
         case 5: return Color.PINK;   // T
         case 6: return Color.ORANGE; // J

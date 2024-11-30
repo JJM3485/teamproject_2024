@@ -418,9 +418,9 @@ public class Tetris extends JFrame {
     private void startFallingBlock() {
         rotation = 0;  // 초기 회전 상태
         currentX = 0;  // 초기 X 위치
-        currentY = 1;  // 초기 Y 위치
+        currentY = 3;  // 초기 Y 위치
     
-        currentColor = getColorForBlock(blockType);
+        currentColor = getColorForBlock(blockType); // 현재 블록의 색상 설정
     
         // 게임 오버 여부 확인
         if (isGameOver()) {
@@ -433,6 +433,7 @@ public class Tetris extends JFrame {
         // 현재 블록을 화면에 그림
         drawBlock(rotation);
     }
+    
 
 // 다음에 나타날 블럭을 nextBlockLabel에 표시하는 메소드
 private void showNextBlock() {
@@ -464,16 +465,36 @@ private void showNextBlock() {
 private void drawBlock(int rotation) {
     clearBoard(); // 이전 상태 초기화
 
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+    // **특수 블록 여부 확인**
+    int[][] shape;
+    if (blockType == -2) { // 에레린 특수 블록 (2x5)
+        shape = new int[][] { 
+            {1, 1}, 
+            {1, 1}, 
+            {1, 1}, 
+            {1, 1}, 
+            {1, 1} 
+        };
+    } else { // 일반 블록
+        shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+    }
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
             if (shape[i][j] == 1 && currentX + i < 20 && currentY + j >= 0 && currentY + j < 10) {
-                cellLabels[currentX + i][currentY + j].setBackground(currentColor);
+                // **블록 색상 설정**
+                cellLabels[currentX + i][currentY + j].setBackground(
+                    blockType == -2 ? currentColor : getColorForBlock(blockType)
+                );
             }
         }
     }
 }
+
+
+
+
+
 
 
 
@@ -496,14 +517,46 @@ private Color getColorForBlock(int blockType) {
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
+    if (blockType == -2) { // 에레린의 특수 블록인 경우
+        clearPath(currentX, currentY); // 아래로 이동하면서 충돌하는 블록 제거
+    }
+
     if (canMove(currentX + 1, currentY)) {
         currentX++;
-        drawBlock(rotation);
+        drawBlock(rotation); // 올바른 색상 유지
     } else {
-        fixBlock(); // 블록 고정
-        startFallingBlock(); // 새로운 블록 시작
+        if (blockType == -2) { // 특수 블록이 바닥에 닿았을 때
+            removeSpecialBlock(currentX, currentY); // 특수 블록 삭제 처리
+        } else {
+            fixBlock(); // 일반 블록 고정
+        }
     }
 }
+
+
+
+private void clearPath(int x, int y) {
+    int[][] shape = blockType == -2 
+        ? new int[][] { {1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1} } 
+        : new int[][] { {1} };
+
+    for (int i = 0; i < shape.length; i++) {
+        for (int j = 0; j < shape[i].length; j++) {
+            if (shape[i][j] == 1) {
+                int newX = x + i + 1; // 아래로 이동 후 위치
+                int newY = y + j;
+
+                // 충돌한 블록만 삭제
+                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
+                    board[newX][newY] = 0; // 데이터 초기화
+                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
+                }
+            }
+        }
+    }
+}
+
+
 
 
 // 블록 이동 여부 체크
@@ -547,6 +600,20 @@ private boolean isGameOver() {
 
 
 private void fixBlock() {
+    if (blockType == -2) {
+        // 특수 블록은 고정 없이 바로 삭제 후 새로운 블록 시작
+        removeSpecialBlock(currentX, currentY);
+
+        // 다음 블록 설정
+        blockType = nextBlockType;
+        Random rand = new Random();
+        nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
+
+        showNextBlock(); // 다음 블록 UI 갱신
+        startFallingBlock(); // 새로운 블록 시작
+        return;
+    }
+
     int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
 
     for (int i = 0; i < shape.length; i++) {
@@ -558,12 +625,7 @@ private void fixBlock() {
         }
     }
 
-    // 특수 블록(-1)인 경우 주변 블록 제거 처리
-    if (blockType == -1) {
-        explodeSurroundingBlocks(currentX, currentY); // 주변 블록 처리
-    } else {
-        clearFullLines(); // 일반 블록은 줄 삭제 확인
-    }
+    clearFullLines(); // 일반 블록의 경우 줄 삭제 확인
 
     holdUsed = false; // 홀드 사용 가능 상태 초기화
 
@@ -578,53 +640,14 @@ private void fixBlock() {
         return;
     }
 
-    blockType = nextBlockType;
+    blockType = nextBlockType; // 현재 블록을 다음 블록으로 설정
     Random rand = new Random();
-    nextBlockType = rand.nextInt(SHAPE.length);
+    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
 
-    showNextBlock();
-    startFallingBlock();
+    showNextBlock(); // 다음 블록 UI 갱신
+    startFallingBlock(); // 새로운 블록 시작
 }
 
-
-private void explodeSurroundingBlocks(int x, int y) {
-    boolean hasSurroundingBlocks = false;
-
-    // 주변 2칸 탐색
-    for (int i = -2; i <= 2; i++) {
-        for (int j = -2; j <= 2; j++) {
-            int newX = x + i;
-            int newY = y + j;
-
-            // 보드 범위 내에서 블록이 있는지 확인
-            if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
-                hasSurroundingBlocks = true;
-                break;
-            }
-        }
-        if (hasSurroundingBlocks) break; // 블록이 있으면 더 이상 탐색하지 않음
-    }
-
-    if (hasSurroundingBlocks) {
-        // 주변 블록 제거
-        for (int i = -2; i <= 2; i++) {
-            for (int j = -2; j <= 2; j++) {
-                int newX = x + i;
-                int newY = y + j;
-
-                // 보드 범위 내에서 블록 제거
-                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
-                    board[newX][newY] = 0; // 데이터 초기화
-                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
-                }
-            }
-        }
-    } 
-
-    // 특수 블록만 제거
-    board[x][y] = 0;
-    cellLabels[x][y].setBackground(Color.BLACK);
-}
 
 
 
@@ -700,7 +723,70 @@ private void handleRewards(int difficulty) {
     }
 }
 
-private void erin() {abilitylabel.setVisible(false);} 
+private void erin() {
+    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+
+    // 현재 블록 제거
+    clearBoard();
+
+    // **특수 블록 설정 (가로 2, 세로 5 크기)**
+    blockType = -2; // 에린 특수 블록 타입
+    rotation = 0;
+
+    // **위치 변경**: X=2, Y=3로 설정
+    currentX = 2; // X 위치를 2로 설정
+    currentY = 3; // Y 위치를 3으로 설정
+    currentColor = Color.GRAY; // 회색 설정 (검사의 직업 이미지와 부합)
+
+    // 새로운 블록 그리기
+    drawBlock(rotation);
+
+    // 능력 사용 처리
+    abilityUsed = true;
+
+    abilitylabel.setVisible(false);
+}
+
+
+
+private void removeSpecialBlock(int x, int y) {
+    int[][] shape = new int[][] { 
+        {1, 1}, 
+        {1, 1}, 
+        {1, 1}, 
+        {1, 1}, 
+        {1, 1} 
+    };
+
+    for (int i = 0; i < shape.length; i++) {
+        for (int j = 0; j < shape[i].length; j++) {
+            if (shape[i][j] == 1) {
+                int newX = x + i;
+                int newY = y + j;
+
+                // 충돌한 블록만 삭제
+                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
+                    board[newX][newY] = 0; // 데이터 초기화
+                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
+                }
+            }
+        }
+    }
+
+    // 블록 삭제 후 새로운 블록 생성
+    blockType = nextBlockType;
+    Random rand = new Random();
+    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
+    showNextBlock(); // 다음 블록 UI 갱신
+    startFallingBlock(); // 새로운 블록 시작
+}
+
+
+
+
+
+
+
 private void reon() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
 

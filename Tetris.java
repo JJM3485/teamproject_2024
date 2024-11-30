@@ -741,6 +741,31 @@ private void erin() {
     // 새로운 블록 그리기
     drawBlock(rotation);
 
+    // 게임 화면 숨기기 (gameLabel)
+    gameLabel.setVisible(false);
+
+    // 방패 이미지를 덮기 위한 JLabel 생성
+    JLabel swordLabel = new JLabel();
+    swordLabel.setIcon(new ImageIcon("images/ability/sword.png"));
+    swordLabel.setBounds(gameLabel.getBounds()); // gameLabel과 같은 위치에 설정
+    swordLabel.setOpaque(false); // 배경을 투명하게 설정
+    
+    // easyLabel에 방패 이미지 추가
+    easyLabel.add(swordLabel);
+    easyLabel.revalidate(); // 레이아웃 갱신
+    easyLabel.repaint();    // 화면 갱신
+    
+    // 항상 0.5초 동안 방패 이미지가 보이도록 설정
+    int shieldTime = 500; // 0.5초 (500ms)
+    
+    // 지정된 시간 후 방패 이미지 제거하고 gameLabel 다시 보이게 하기
+    new Timer(shieldTime, e -> {
+        easyLabel.remove(swordLabel); // 방패 이미지 제거
+        gameLabel.setVisible(true);     // gameLabel 다시 보이게 하기
+        easyLabel.revalidate();         // 레이아웃 갱신
+        easyLabel.repaint();            // 화면 갱신
+    }).start();
+
     // 능력 사용 처리
     abilityUsed = true;
 

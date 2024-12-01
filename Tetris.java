@@ -910,14 +910,29 @@ private void serena() {
     rotation = 0;
     currentX = 0; // 화면 최상단
     currentY = 4; // 중앙에서 시작
-    currentColor = Color.RED; // 빨간색 설정
+    currentColor = Color.RED; // 블록 색상 설정
 
-    // 새로운 블록 그리기
-    drawBlock(rotation);
+    // 능력 블록 아이콘 설정
+    ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+    scaleAndSetIcon(fireIcon, currentX, currentY);
 
     abilityUsed = true; // 능력 사용 처리
     abilitylabel.setVisible(false); // 능력 라벨 숨기기
 }
+
+// 아이콘 크기를 조정하고 해당 위치에 설정하는 메서드
+private void scaleAndSetIcon(ImageIcon icon, int x, int y) {
+    Image img = icon.getImage();
+    int width = cellLabels[0][0].getWidth(); // 셀 크기에 맞추기
+    int height = cellLabels[0][0].getHeight();
+    Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    icon = new ImageIcon(scaledImg);
+
+    // 셀에 아이콘 설정
+    cellLabels[x][y].setIcon(icon);
+    cellLabels[x][y].setBackground(Color.BLACK); // 배경 검정색으로 설정
+}
+
 
 
 // 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거

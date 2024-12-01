@@ -28,6 +28,7 @@ public class Tetris extends JFrame {
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
     private ImageIcon swordBlockIcon; // 검사의 특수 블록 이미지
+    private JLabel abilityImageLabel; // 능력 블록 이미지를 표시할 라벨
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
     private String[] imagePaths = {
             "images/ch/man_1.png",
@@ -36,6 +37,7 @@ public class Tetris extends JFrame {
             "images/ch/woman_2.png",
             "images/ch/slime.png"
     };
+    
 
 
 
@@ -509,7 +511,6 @@ private void drawBlock(int rotation) {
 
 
 // 블록 색을 설정하는 메소드
-// 블록 색을 설정하는 메소드
 private Color getColorForBlock(int blockType) {
     switch (blockType) {
         case 0: return Color.CYAN;  // I
@@ -519,7 +520,6 @@ private Color getColorForBlock(int blockType) {
         case 4: return Color.BLUE;   // L
         case 5: return Color.PINK;   // T
         case 6: return Color.ORANGE; // J
-        case -1: return Color.RED;   // 셀레나의 특수 블록
         default: return Color.WHITE; // 기본 값
     }
 }
@@ -527,21 +527,37 @@ private Color getColorForBlock(int blockType) {
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
-    if (blockType == -2) { // 특수 블록
-        clearPath(currentX, currentY); // 아래로 이동하며 충돌한 블록 제거
-    }
-
     if (canMove(currentX + 1, currentY)) {
-        currentX++; // 블록 아래로 이동
-        drawBlock(rotation); // 새 위치에 블록 그리기
+        // 이동 가능하면 이동
+        currentX++;
+        drawBlock(rotation);
+
+        // 능력 블록의 새로운 위치에 이미지 설정
+        if (blockType == -1) {
+            ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+            setBlockImage(fireIcon, currentX, currentY);
+        }
     } else {
-        if (blockType == -2) {
-            removeSpecialBlock(currentX, currentY); // 특수 블록 삭제 처리
+        // 충돌 시 처리
+        if (blockType == -1) {
+            // 능력 블록인 경우 즉시 발동
+            removeSurroundingBlocks(currentX, currentY);
+
+            // 다음 블록으로 전환
+            blockType = nextBlockType;
+            Random rand = new Random();
+            nextBlockType = rand.nextInt(SHAPE.length);
+            showNextBlock(); // 다음 블록 표시
+            startFallingBlock(); // 새로운 블록 시작
         } else {
-            fixBlock(); // 일반 블록 고정
+            fixBlock(); // 일반 블록은 고정
         }
     }
 }
+
+
+
+
 
 
 
@@ -658,6 +674,7 @@ private void fixBlock() {
     showNextBlock(); // 다음 블록 UI 갱신
     startFallingBlock(); // 새로운 블록 시작
 }
+
 
 
 
@@ -788,39 +805,6 @@ private void erin() {
 
 
 
-private void removeSpecialBlock(int x, int y) {
-    int[][] shape = new int[][] { 
-        {1, 1}, 
-        {1, 1}, 
-        {1, 1}, 
-        {1, 1}, 
-        {1, 1} 
-    };
-
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            int newX = x + i;
-            int newY = y + j;
-
-            if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
-                JLabel cell = cellLabels[newX][newY];
-                board[newX][newY] = 0; // 데이터 초기화
-                cell.setBackground(Color.BLACK); // 색상 초기화
-                cell.setIcon(null); // **이미지 제거**
-            }
-        }
-    }
-
-    // 다음 블록 생성
-    blockType = nextBlockType;
-    Random rand = new Random();
-    nextBlockType = rand.nextInt(SHAPE.length);
-    showNextBlock(); // 다음 블록 표시
-    startFallingBlock(); // 새로운 블록 시작
-}
-
-
-
 
 
 
@@ -900,44 +884,76 @@ private void reon() {
 
 
 private void serena() {
-    if (abilityUsed) return; // 능력을 이미 사용했다면 실행하지 않음
+    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
 
-    // 현재 블록 제거
-    clearBoard(); // 이전 블록 화면 지우기
+    // 현재 블록 삭제
+    clearCurrentBlock();
 
-    // 특수 블록 설정 (1x1 빨간 블록)
-    blockType = -1; // 특수 블록 타입
+    // 능력 블록 설정
+    blockType = -1; // 셀레나의 특수 블록 타입
     rotation = 0;
     currentX = 0; // 화면 최상단
     currentY = 4; // 중앙에서 시작
-    currentColor = Color.RED; // 블록 색상 설정
 
-    // 능력 블록 아이콘 설정
+    // 능력 블록 이미지 설정
     ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-    scaleAndSetIcon(fireIcon, currentX, currentY);
+    setBlockImage(fireIcon, currentX, currentY);
 
-    abilityUsed = true; // 능력 사용 처리
-    abilitylabel.setVisible(false); // 능력 라벨 숨기기
+    // 능력 사용 처리
+    abilityUsed = true;
+    abilitylabel.setVisible(false); // 능력 버튼 숨김
 }
 
-// 아이콘 크기를 조정하고 해당 위치에 설정하는 메서드
-private void scaleAndSetIcon(ImageIcon icon, int x, int y) {
+private void clearCurrentBlock() {
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+
+    for (int i = 0; i < shape.length; i++) {
+        for (int j = 0; j < shape[i].length; j++) {
+            if (shape[i][j] == 1) {
+                int x = currentX + i;
+                int y = currentY + j;
+
+                if (x >= 0 && x < 20 && y >= 0 && y < 10) {
+                    board[x][y] = 0; // 보드 데이터 초기화
+                    cellLabels[x][y].setBackground(Color.BLACK); // 색상 초기화
+                    cellLabels[x][y].setIcon(null); // 이미지 제거
+                }
+            }
+        }
+    }
+}
+
+private void setBlockImage(ImageIcon icon, int x, int y) {
     Image img = icon.getImage();
-    int width = cellLabels[0][0].getWidth(); // 셀 크기에 맞추기
+    int width = cellLabels[0][0].getWidth(); // 블록 크기에 맞춤
     int height = cellLabels[0][0].getHeight();
     Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
     icon = new ImageIcon(scaledImg);
 
-    // 셀에 아이콘 설정
+    // 셀에 이미지 설정
     cellLabels[x][y].setIcon(icon);
-    cellLabels[x][y].setBackground(Color.BLACK); // 배경 검정색으로 설정
+    cellLabels[x][y].setBackground(null); // 배경 제거
+}
+
+
+private void updateAbilityImagePosition() {
+    if (abilityImageLabel != null) {
+        int blockWidth = cellLabels[0][0].getWidth();  // 블록 크기
+        int blockHeight = cellLabels[0][0].getHeight();
+
+        // 라벨 위치를 블록 위치에 맞게 조정
+        int x = gameLabel.getX() + currentY * blockWidth;
+        int y = gameLabel.getY() + currentX * blockHeight;
+
+        abilityImageLabel.setBounds(x, y, blockWidth, blockHeight);
+        abilityImageLabel.setVisible(true); // 이미지를 항상 보이게 설정
+    }
 }
 
 
 
 // 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거
 private void removeSurroundingBlocks(int centerX, int centerY) {
-    // 주변 2칸 범위 계산
     int startX = Math.max(centerX - 2, 0);
     int endX = Math.min(centerX + 2, 19);
     int startY = Math.max(centerY - 2, 0);
@@ -947,7 +963,7 @@ private void removeSurroundingBlocks(int centerX, int centerY) {
         for (int j = startY; j <= endY; j++) {
             board[i][j] = 0; // 보드 데이터 초기화
             cellLabels[i][j].setBackground(Color.BLACK); // 색상 초기화
-            cellLabels[i][j].setIcon(null); // 아이콘 제거
+            cellLabels[i][j].setIcon(null); // 이미지 제거
         }
     }
 
@@ -956,6 +972,10 @@ private void removeSurroundingBlocks(int centerX, int centerY) {
     cellLabels[centerX][centerY].setBackground(Color.BLACK);
     cellLabels[centerX][centerY].setIcon(null);
 }
+
+
+
+
 
 
 
@@ -1007,13 +1027,22 @@ private void sily() {
 private void clearBoard() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 0) { // 고정된 블록은 초기화하지 않음
-                cellLabels[i][j].setBackground(Color.BLACK); // 빈 칸은 검정으로 초기화
-                cellLabels[i][j].setIcon(null); // 이미지는 초기화
+            if (board[i][j] == 0) {
+                cellLabels[i][j].setBackground(Color.BLACK);
+                cellLabels[i][j].setIcon(null);
             }
         }
     }
+
+    // 능력 블록 이미지 초기화
+    if (abilityImageLabel != null) {
+        easyLabel.remove(abilityImageLabel);
+        abilityImageLabel = null;
+        easyLabel.revalidate();
+        easyLabel.repaint();
+    }
 }
+
 
 
 

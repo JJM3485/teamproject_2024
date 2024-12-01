@@ -474,33 +474,38 @@ private void showNextBlock() {
 }
 
 
-// 블록을 그리기 전에 화면을 지운다.
 private void drawBlock(int rotation) {
     clearBoard(); // 기존 블록의 셀만 초기화
 
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+    int[][] shape;
+    if (blockType == -2) { // 에린의 능력 블록
+        shape = new int[][] {
+            {1, 1},
+            {1, 1},
+            {1, 1},
+            {1, 1},
+        };
+    } else if (blockType == -1) { // 셀레나의 능력 블록 (1x1 하얀 블록)
+        shape = new int[][] { {1} };
+    } else {
+        shape = SHAPE[blockType][rotation];
+    }
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
             if (shape[i][j] == 1) {
-                int newX = currentX + i;
-                int newY = currentY + j;
+                int x = currentX + i;
+                int y = currentY + j;
 
-                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
-                    if (blockType == -1) {
-                        // 능력 블록인 경우 이미지 설정
-                        ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-                        setBlockImage(fireIcon, newX, newY);
-                    } else {
-                        // 일반 블록인 경우 색상 설정
-                        cellLabels[newX][newY].setBackground(getColorForBlock(blockType));
-                        cellLabels[newX][newY].setIcon(null);
-                    }
+                if (x >= 0 && x < 20 && y >= 0 && y < 10) {
+                    cellLabels[x][y].setBackground(currentColor); // 블록 색상
+                    cellLabels[x][y].setIcon(null); // 이미지 제거
                 }
             }
         }
     }
 }
+
 
 
 
@@ -523,62 +528,56 @@ private Color getColorForBlock(int blockType) {
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
-    if (canMove(currentX + 1, currentY)) {
-        // 이동 가능하면 이동
-        currentX++;
-        drawBlock(rotation);
+    if (blockType == -2) { // 에린의 능력 블록일 경우
+            // 이동 중 충돌한 블록을 삭제
+        deleteCollidedBlock(currentX, currentY);
 
-        // 능력 블록의 새로운 위치에 이미지 설정
-        if (blockType == -1) {
-            ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-            setBlockImage(fireIcon, currentX, currentY);
-        }
-    } else {
-        // 충돌 시 처리
-        if (blockType == -1) {
-            // 능력 블록인 경우 즉시 발동
-            removeSurroundingBlocks(currentX, currentY);
+        // 아래로 이동 가능한지 확인
+        if (canMove(currentX + 1, currentY)) {
+            currentX++;
+            drawBlock(rotation); // 블록을 화면에 그리기
+        } else {
+            // 더 이상 이동 불가 -> 바닥 도달 시 능력 블록 제거
+            clearCurrentBlock();
+            abilityUsed = false; // 능력 초기화
 
-            // 다음 블록으로 전환
+            // 다음 블록 생성
             blockType = nextBlockType;
             Random rand = new Random();
             nextBlockType = rand.nextInt(SHAPE.length);
             showNextBlock(); // 다음 블록 표시
             startFallingBlock(); // 새로운 블록 시작
+            }
+    } else {
+        if (canMove(currentX + 1, currentY)) {
+            // 이동 가능하면 이동
+            currentX++;
+            drawBlock(rotation);
+    
+            // 능력 블록의 새로운 위치에 이미지 설정
+            if (blockType == -1) {
+                ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+                setBlockImage(fireIcon, currentX, currentY);
+            }
         } else {
-            fixBlock(); // 일반 블록은 고정
-        }
-    }
-}
-
-
-
-
-
-
-
-
-private void clearPath(int x, int y) {
-    int[][] shape = blockType == -2 
-        ? new int[][] { {1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1} } 
-        : new int[][] { {1} };
-
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                int newX = x + i + 1; // 아래로 이동 후 위치
-                int newY = y + j;
-
-                // 충돌한 블록만 삭제
-                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
-                    board[newX][newY] = 0; // 데이터 초기화
-                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
-                }
+            if (blockType == -1) {
+                // 능력 블록인 경우 즉시 발동
+                removeSurroundingBlocks(currentX, currentY);
+        
+                // 다음 블록으로 전환
+                blockType = nextBlockType;
+                Random rand = new Random();
+                nextBlockType = rand.nextInt(SHAPE.length);
+                showNextBlock(); // 다음 블록 표시
+                startFallingBlock(); // 새로운 블록 시작
+            } else{
+                fixBlock(); // 일반 블록은 고정
             }
         }
-    }
-}
 
+    }
+    
+}
 
 
 
@@ -592,8 +591,13 @@ private boolean canMove(int x, int y) {
                 int newX = x + i;
                 int newY = y + j;
 
-                // 경계를 벗어나거나 고정된 블록과 충돌하는지 확인
-                if (newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
+                // 경계를 벗어나거나 고정된 블록과 충돌 확인
+                if (newX >= 20 || newY < 0 || newY >= 10) {
+                    return false;
+                }
+
+                // 능력 블록은 다른 블록과의 충돌을 무시
+                if (blockType != -2 && board[newX][newY] == 1) {
                     return false;
                 }
             }
@@ -601,6 +605,7 @@ private boolean canMove(int x, int y) {
     }
     return true; // 이동 가능
 }
+
 
 
 // 블럭 생성 시 고정된 블럭과의 충돌 여부를 체크하여 게임 오버 상태를 결정하는 메소드
@@ -753,53 +758,52 @@ private void handleRewards(int difficulty) {
 private void erin() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
 
-    // 현재 블록 제거
-    clearBoard();
+    // 기존 블록 제거
+    clearCurrentBlock();
 
-    // **특수 블록 설정 (가로 2, 세로 5 크기)**
+    // 능력 블록 생성
     blockType = -2; // 에린 특수 블록 타입
     rotation = 0;
+    currentX = 0; // 최상단에서 시작
+    currentY = 3; // 중앙 정렬
+    currentColor = Color.GRAY; // 능력 블록 색상
 
-    // **위치 변경**: X=2, Y=3로 설정
-    currentX = 2; // X 위치를 2로 설정
-    currentY = 3; // Y 위치를 3으로 설정
-    currentColor = Color.GRAY; // 회색 설정 (검사의 직업 이미지와 부합)
-
-    // 새로운 블록 그리기
+    // 능력 블록 화면 표시
     drawBlock(rotation);
 
-    // 게임 화면 숨기기 (gameLabel)
-    gameLabel.setVisible(false);
-
-    // 방패 이미지를 덮기 위한 JLabel 생성
-    JLabel swordLabel = new JLabel();
-    swordLabel.setIcon(new ImageIcon("images/ability/sword.png"));
-    swordLabel.setBounds(gameLabel.getBounds()); // gameLabel과 같은 위치에 설정
-    swordLabel.setOpaque(false); // 배경을 투명하게 설정
-    
-    // easyLabel에 방패 이미지 추가
-    easyLabel.add(swordLabel);
-    easyLabel.revalidate(); // 레이아웃 갱신
-    easyLabel.repaint();    // 화면 갱신
-    
-    // 항상 0.5초 동안 방패 이미지가 보이도록 설정
-    int shieldTime = 500; // 0.5초 (500ms)
-    
-    // 지정된 시간 후 방패 이미지 제거하고 gameLabel 다시 보이게 하기
-    new Timer(shieldTime, e -> {
-        easyLabel.remove(swordLabel); // 방패 이미지 제거
-        gameLabel.setVisible(true);     // gameLabel 다시 보이게 하기
-        easyLabel.revalidate();         // 레이아웃 갱신
-        easyLabel.repaint();            // 화면 갱신
-    }).start();
-
-    // 능력 사용 처리
-    abilityUsed = true;
-
-    abilitylabel.setVisible(false);
+    abilityUsed = true; // 능력 사용 상태 갱신
+    abilitylabel.setVisible(false); // 능력 버튼 숨김
 }
 
 
+
+private void deleteCollidedBlock(int x, int y) {
+    // 에린의 능력 블록 크기 (4x2)
+    int[][] erinBlockShape = {
+        {1, 1},
+        {1, 1},
+        {1, 1},
+        {1, 1}
+    };
+
+    for (int i = 0; i < erinBlockShape.length; i++) {
+        for (int j = 0; j < erinBlockShape[i].length; j++) {
+            if (erinBlockShape[i][j] == 1) {
+                int checkX = x + i;
+                int checkY = y + j;
+
+                // 보드 범위 확인
+                if (checkX >= 0 && checkX < 20 && checkY >= 0 && checkY < 10) {
+                    if (board[checkX][checkY] == 1) { // 고정된 블록이 존재하면
+                        board[checkX][checkY] = 0; // 보드에서 제거
+                        cellLabels[checkX][checkY].setBackground(Color.BLACK); // UI 초기화
+                        cellLabels[checkX][checkY].setIcon(null); // 아이콘 제거
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 

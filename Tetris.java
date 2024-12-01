@@ -498,8 +498,15 @@ private void drawBlock(int rotation) {
                 int y = currentY + j;
 
                 if (x >= 0 && x < 20 && y >= 0 && y < 10) {
-                    cellLabels[x][y].setBackground(currentColor); // 블록 색상
-                    cellLabels[x][y].setIcon(null); // 이미지 제거
+                    if (blockType == -1) {
+                        // 능력 블록인 경우 이미지 설정
+                        ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+                        setBlockImage(fireIcon, x, y);
+                    } else {
+                        // 일반 블록인 경우 색상 설정
+                        cellLabels[x][y].setBackground(getColorForBlock(blockType));
+                        cellLabels[x][y].setIcon(null);
+                    }
                 }
             }
         }

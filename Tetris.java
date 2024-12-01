@@ -27,6 +27,7 @@ public class Tetris extends JFrame {
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
+    private ImageIcon swordBlockIcon; // 검사의 특수 블록 이미지
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
     private String[] imagePaths = {
             "images/ch/man_1.png",
@@ -90,6 +91,16 @@ public class Tetris extends JFrame {
         Container c = getContentPane();
         c.setLayout(null);
         setSize(initialWidth, initialHeight);
+
+            // 검사의 특수 블록 이미지 로드
+        swordBlockIcon = new ImageIcon("images/ability/sword.png");
+
+        // 이미지 크기 조정 (블록 크기에 맞게)
+        Image img = swordBlockIcon.getImage();
+        int blockWidth = 30; // 블록 가로 크기
+        int blockHeight = 30; // 블록 세로 크기
+        Image scaledImg = img.getScaledInstance(blockWidth, blockHeight, Image.SCALE_SMOOTH);
+        swordBlockIcon = new ImageIcon(scaledImg);
 
         originalIcon = new ImageIcon("images/first.png");
 
@@ -463,11 +474,10 @@ private void showNextBlock() {
 
 // 블록을 그리기 전에 화면을 지운다.
 private void drawBlock(int rotation) {
-    clearBoard(); // 이전 상태 초기화
+    clearBoard(); // 움직이는 블록의 셀만 초기화
 
-    // **특수 블록 여부 확인**
     int[][] shape;
-    if (blockType == -2) { // 에레린 특수 블록 (2x5)
+    if (blockType == -2) { // 특수 블록
         shape = new int[][] { 
             {1, 1}, 
             {1, 1}, 
@@ -481,18 +491,18 @@ private void drawBlock(int rotation) {
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1 && currentX + i < 20 && currentY + j >= 0 && currentY + j < 10) {
-                // **블록 색상 설정**
-                cellLabels[currentX + i][currentY + j].setBackground(
-                    blockType == -2 ? currentColor : getColorForBlock(blockType)
-                );
+            if (shape[i][j] == 1) {
+                int newX = currentX + i;
+                int newY = currentY + j;
+
+                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
+                    cellLabels[newX][newY].setBackground(getColorForBlock(blockType));
+                    cellLabels[newX][newY].setIcon(null); // 기본 블록은 아이콘 없음
+                }
             }
         }
     }
 }
-
-
-
 
 
 
@@ -517,21 +527,22 @@ private Color getColorForBlock(int blockType) {
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
-    if (blockType == -2) { // 에레린의 특수 블록인 경우
-        clearPath(currentX, currentY); // 아래로 이동하면서 충돌하는 블록 제거
+    if (blockType == -2) { // 특수 블록
+        clearPath(currentX, currentY); // 아래로 이동하며 충돌한 블록 제거
     }
 
     if (canMove(currentX + 1, currentY)) {
-        currentX++;
-        drawBlock(rotation); // 올바른 색상 유지
+        currentX++; // 블록 아래로 이동
+        drawBlock(rotation); // 새 위치에 블록 그리기
     } else {
-        if (blockType == -2) { // 특수 블록이 바닥에 닿았을 때
+        if (blockType == -2) {
             removeSpecialBlock(currentX, currentY); // 특수 블록 삭제 처리
         } else {
             fixBlock(); // 일반 블록 고정
         }
     }
 }
+
 
 
 
@@ -600,20 +611,20 @@ private boolean isGameOver() {
 
 
 private void fixBlock() {
-    if (blockType == -2) {
-        // 특수 블록은 고정 없이 바로 삭제 후 새로운 블록 시작
-        removeSpecialBlock(currentX, currentY);
+    if (blockType == -1) {
+        // 능력 블록일 경우 주변 블록 제거
+        removeSurroundingBlocks(currentX, currentY);
 
-        // 다음 블록 설정
+        // 새로운 블록 시작
         blockType = nextBlockType;
         Random rand = new Random();
-        nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
-
-        showNextBlock(); // 다음 블록 UI 갱신
+        nextBlockType = rand.nextInt(SHAPE.length);
+        showNextBlock(); // 다음 블록 표시
         startFallingBlock(); // 새로운 블록 시작
-        return;
+        return; // 이후 일반 블록 고정 로직 실행하지 않음
     }
 
+    // 일반 블록 고정
     int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
 
     for (int i = 0; i < shape.length; i++) {
@@ -625,7 +636,7 @@ private void fixBlock() {
         }
     }
 
-    clearFullLines(); // 일반 블록의 경우 줄 삭제 확인
+    clearFullLines(); // 줄 삭제 확인
 
     holdUsed = false; // 홀드 사용 가능 상태 초기화
 
@@ -642,11 +653,12 @@ private void fixBlock() {
 
     blockType = nextBlockType; // 현재 블록을 다음 블록으로 설정
     Random rand = new Random();
-    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
+    nextBlockType = rand.nextInt(SHAPE.length);
 
     showNextBlock(); // 다음 블록 UI 갱신
     startFallingBlock(); // 새로운 블록 시작
 }
+
 
 
 
@@ -698,6 +710,8 @@ private void resetGame() {
     if (easyButton != null) easyButton.setVisible(false);
     if (mediumButton != null) mediumButton.setVisible(false);
     if (hardButton != null) hardButton.setVisible(false);
+
+    abilityUsed = false; 
 
     revalidate();
     repaint();
@@ -785,26 +799,26 @@ private void removeSpecialBlock(int x, int y) {
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                int newX = x + i;
-                int newY = y + j;
+            int newX = x + i;
+            int newY = y + j;
 
-                // 충돌한 블록만 삭제
-                if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10 && board[newX][newY] == 1) {
-                    board[newX][newY] = 0; // 데이터 초기화
-                    cellLabels[newX][newY].setBackground(Color.BLACK); // 색상 초기화
-                }
+            if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
+                JLabel cell = cellLabels[newX][newY];
+                board[newX][newY] = 0; // 데이터 초기화
+                cell.setBackground(Color.BLACK); // 색상 초기화
+                cell.setIcon(null); // **이미지 제거**
             }
         }
     }
 
-    // 블록 삭제 후 새로운 블록 생성
+    // 다음 블록 생성
     blockType = nextBlockType;
     Random rand = new Random();
-    nextBlockType = rand.nextInt(SHAPE.length); // 새로운 다음 블록 생성
-    showNextBlock(); // 다음 블록 UI 갱신
+    nextBlockType = rand.nextInt(SHAPE.length);
+    showNextBlock(); // 다음 블록 표시
     startFallingBlock(); // 새로운 블록 시작
 }
+
 
 
 
@@ -901,11 +915,31 @@ private void serena() {
     // 새로운 블록 그리기
     drawBlock(rotation);
 
-    // 능력 사용 처리
-    abilityUsed = true;
+    abilityUsed = true; // 능력 사용 처리
+    abilitylabel.setVisible(false); // 능력 라벨 숨기기
+}
 
-    // 능력 발동 후 abilitylabel 숨김
-    abilitylabel.setVisible(false);
+
+// 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거
+private void removeSurroundingBlocks(int centerX, int centerY) {
+    // 주변 2칸 범위 계산
+    int startX = Math.max(centerX - 2, 0);
+    int endX = Math.min(centerX + 2, 19);
+    int startY = Math.max(centerY - 2, 0);
+    int endY = Math.min(centerY + 2, 9);
+
+    for (int i = startX; i <= endX; i++) {
+        for (int j = startY; j <= endY; j++) {
+            board[i][j] = 0; // 보드 데이터 초기화
+            cellLabels[i][j].setBackground(Color.BLACK); // 색상 초기화
+            cellLabels[i][j].setIcon(null); // 아이콘 제거
+        }
+    }
+
+    // 능력 블록도 제거
+    board[centerX][centerY] = 0;
+    cellLabels[centerX][centerY].setBackground(Color.BLACK);
+    cellLabels[centerX][centerY].setIcon(null);
 }
 
 
@@ -958,12 +992,15 @@ private void sily() {
 private void clearBoard() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 0) {
-                cellLabels[i][j].setBackground(Color.BLACK);  // 이전 블록의 색상 지우기
+            if (board[i][j] == 0) { // 고정된 블록은 초기화하지 않음
+                cellLabels[i][j].setBackground(Color.BLACK); // 빈 칸은 검정으로 초기화
+                cellLabels[i][j].setIcon(null); // 이미지는 초기화
             }
         }
     }
 }
+
+
 
     private void updateBackgroundImage() {
         int width = getWidth();
@@ -1094,17 +1131,24 @@ private void clearBoard() {
         }
     
         // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
+        // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
         private void dropBlockInstantly() {
             // 블록이 더 이상 내려갈 수 없을 때까지 내려보낸다
             while (canMove(currentX + 1, currentY)) {
                 currentX++; // 아래로 한 칸 내려가기
-                drawBlock(rotation); // 블록을 화면에 그리기
             }
-    
+
+    // 블록이 도착한 위치에서 추가 동작 처리
+            if (blockType == -1) {
+                // 셀레나의 능력 블록일 경우, 주변 블록 제거
+                removeSurroundingBlocks(currentX, currentY);
+            }
+
             // 블록을 고정시키고, 새로운 블록을 시작
             fixBlock();
             startFallingBlock();
         }
+
     }
 
     // 한 줄이 다 채워졌는지 확인하고, 채워졌으면 그 줄을 지우고 위의 줄을 내린다.

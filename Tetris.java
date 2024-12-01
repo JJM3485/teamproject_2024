@@ -773,7 +773,6 @@ private void erin() {
     rotation = 0;
     currentX = 0; // 최상단에서 시작
     currentY = 3; // 중앙 정렬
-    currentColor = Color.GRAY; // 능력 블록 색상
 
     // 능력 블록 화면 표시
     drawBlock(rotation);

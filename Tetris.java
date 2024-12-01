@@ -476,20 +476,9 @@ private void showNextBlock() {
 
 // 블록을 그리기 전에 화면을 지운다.
 private void drawBlock(int rotation) {
-    clearBoard(); // 움직이는 블록의 셀만 초기화
+    clearBoard(); // 기존 블록의 셀만 초기화
 
-    int[][] shape;
-    if (blockType == -2) { // 특수 블록
-        shape = new int[][] { 
-            {1, 1}, 
-            {1, 1}, 
-            {1, 1}, 
-            {1, 1}, 
-            {1, 1} 
-        };
-    } else { // 일반 블록
-        shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
-    }
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
@@ -498,8 +487,15 @@ private void drawBlock(int rotation) {
                 int newY = currentY + j;
 
                 if (newX >= 0 && newX < 20 && newY >= 0 && newY < 10) {
-                    cellLabels[newX][newY].setBackground(getColorForBlock(blockType));
-                    cellLabels[newX][newY].setIcon(null); // 기본 블록은 아이콘 없음
+                    if (blockType == -1) {
+                        // 능력 블록인 경우 이미지 설정
+                        ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+                        setBlockImage(fireIcon, newX, newY);
+                    } else {
+                        // 일반 블록인 경우 색상 설정
+                        cellLabels[newX][newY].setBackground(getColorForBlock(blockType));
+                        cellLabels[newX][newY].setIcon(null);
+                    }
                 }
             }
         }
@@ -936,6 +932,7 @@ private void setBlockImage(ImageIcon icon, int x, int y) {
 }
 
 
+
 private void updateAbilityImagePosition() {
     if (abilityImageLabel != null) {
         int blockWidth = cellLabels[0][0].getWidth();  // 블록 크기
@@ -1027,19 +1024,11 @@ private void sily() {
 private void clearBoard() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 0) {
-                cellLabels[i][j].setBackground(Color.BLACK);
-                cellLabels[i][j].setIcon(null);
+            if (board[i][j] == 0) { // 고정된 블록은 초기화하지 않음
+                cellLabels[i][j].setBackground(Color.BLACK); // 빈 칸 초기화
+                cellLabels[i][j].setIcon(null); // 아이콘 초기화
             }
         }
-    }
-
-    // 능력 블록 이미지 초기화
-    if (abilityImageLabel != null) {
-        easyLabel.remove(abilityImageLabel);
-        abilityImageLabel = null;
-        easyLabel.revalidate();
-        easyLabel.repaint();
     }
 }
 

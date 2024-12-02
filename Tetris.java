@@ -1,8 +1,13 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Tetris extends JFrame {
@@ -21,7 +26,7 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false,abilityUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false,abilityUsed = false,isGameOverSoundPlayed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
@@ -37,9 +42,15 @@ public class Tetris extends JFrame {
             "images/ch/woman_2.png",
             "images/ch/slime.png"
     };
+    private String[] musicFilePaths = {
+        "sings/knife.wav",   // 첫 번째 캐릭터의 음악 파일 경로
+        "sings/knife2.wav",   // 두 번째 캐릭터의 음악 파일 경로
+        "sings/wizard.wav", // 세 번째 캐릭터의 음악 파일 경로
+        "sings/nun.wav",// 네 번째 캐릭터의 음악 파일 경로
+        "sings/slime.wav"    // 다섯 번째 캐릭터의 음악 파일 경로
+    };
+    private MusicManager musicManager = new MusicManager();
     
-
-
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
     static final int[][][][] SHAPE = {
@@ -87,22 +98,48 @@ public class Tetris extends JFrame {
         }
     };
 
+    public class MusicManager {
+        private Clip clip;
+    
+        // 음악을 재생하는 메소드
+        public void playMusic(String filePath) {
+            // 기존 음악을 멈추고 새로운 음악을 재생
+            stopMusic(); // 기존 음악 종료
+            try {
+                File file = new File(filePath);
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+                clip = AudioSystem.getClip();
+                clip.open(audioStream);
+    
+                // 음악 종료 후 Clip 리소스 해제
+                clip.addLineListener(event -> {
+                    if (event.getType() == LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+    
+                clip.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    
+        // 음악을 멈추는 메소드
+        public void stopMusic() {
+            // clip이 존재하고 음악이 실행 중이면 멈추기
+            if (clip != null && clip.isRunning()) {
+                clip.stop();
+                clip.close();
+            }
+            }
+        }
+
     public Tetris() {
         setTitle("테트리스");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Container c = getContentPane();
         c.setLayout(null);
         setSize(initialWidth, initialHeight);
-
-            // 검사의 특수 블록 이미지 로드
-        swordBlockIcon = new ImageIcon("images/ability/sword.png");
-
-        // 이미지 크기 조정 (블록 크기에 맞게)
-        Image img = swordBlockIcon.getImage();
-        int blockWidth = 30; // 블록 가로 크기
-        int blockHeight = 30; // 블록 세로 크기
-        Image scaledImg = img.getScaledInstance(blockWidth, blockHeight, Image.SCALE_SMOOTH);
-        swordBlockIcon = new ImageIcon(scaledImg);
 
         originalIcon = new ImageIcon("images/first.png");
 
@@ -116,8 +153,12 @@ public class Tetris extends JFrame {
         exitButton = new JButton("종료하기");
         exitButton.setBounds(350, 580, 100, 50);
 
-        startButton.addActionListener(e -> showDifficultyButtons());
+        startButton.addActionListener(e -> {
+            musicManager.playMusic("sings/start.wav"); 
+            showDifficultyButtons();});
+
         exitButton.addActionListener(e -> {
+            musicManager.playMusic("sings/start.wav"); 
             int result = JOptionPane.showConfirmDialog(null, "정말 종료하시겠습니까?", "종료 확인",
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) System.exit(0);
@@ -135,6 +176,8 @@ public class Tetris extends JFrame {
     private void showDifficultyButtons() {
         startButton.setVisible(false);
         exitButton.setVisible(false);
+
+        
 
         easyButton = new JButton("난이도 하");
         easyButton.setBounds(350, 400, 100, 50);
@@ -164,6 +207,9 @@ public class Tetris extends JFrame {
         revalidate();
         repaint();
     
+        musicManager.stopMusic(); // 기존 음악 정지
+        // 시작 화면 배경음악 재생
+        musicManager.playMusic("sings/first.wav");
 
         JPanel charSelectionPanel = new JPanel() {
             @Override
@@ -305,6 +351,24 @@ public class Tetris extends JFrame {
         revalidate();
         repaint();
 
+        musicManager.stopMusic(); // 기존 음악 정지
+
+                // 난이도에 따라 음악 파일 설정
+        String musicFilePath = switch (currentDifficulty) {
+            case 1 -> "sings/easy.wav";  // 난이도 하
+            case 2 -> "sings/hard.wav"; // 난이도 중
+            case 3 -> "sings/normal.wav";  // 난이도 상
+            default -> {
+                System.err.println("Invalid difficulty level");
+                yield null; // null 반환 방지
+            }
+        };
+
+                // 음악 파일 경로가 유효하면 재생
+        if (musicFilePath != null) {
+            musicManager.playMusic(musicFilePath);
+        }
+
         if (difficulty == 1) {
             easyIcon = new ImageIcon("images/easy.jpg");
         }
@@ -314,7 +378,7 @@ public class Tetris extends JFrame {
         else if (difficulty == 3) {
             easyIcon = new ImageIcon("images/hard.jpg");
         }
-        //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리" chIcon abIcon
+        //"에린 카르테스", "레온 하르트", "셀레나 블레이즈", "루미엘 에테리아", "슬리"
         if (selectedCharacter.equals("에린 카르테스")) {chIcon = new ImageIcon("images/ch/man_1.png"); abIcon = new ImageIcon("images/ability/sword.png");}
         else if (selectedCharacter.equals("레온 하르트")) {chIcon = new ImageIcon("images/ch/man_2.png"); abIcon = new ImageIcon("images/ability/shield_icon.png");}
         else if (selectedCharacter.equals("셀레나")) {chIcon = new ImageIcon("images/ch/woman_1.png"); abIcon = new ImageIcon("images/ability/fire.png");}
@@ -332,9 +396,7 @@ public class Tetris extends JFrame {
         gameLabel.setLayout(new GridLayout(20, 10));
         easyLabel.add(gameLabel);
 
-
-
-            // 다음 블럭을 보여줄 4x4 라벨 생성 및 위치 지정
+        // 다음 블럭을 보여줄 4x4 라벨 생성 및 위치 지정
         nextBlockLabel = new JLabel();
         nextBlockLabel.setBounds(400, 100, 100, 100);
         nextBlockLabel.setLayout(new GridLayout(4, 4)); // 4x4 그리드 설정
@@ -438,6 +500,8 @@ public class Tetris extends JFrame {
         // 게임 오버 여부 확인
         if (isGameOver()) {
             timer.stop();
+            musicManager.stopMusic();  // 게임 오버 후 음악 멈추기
+            musicManager.playMusic("sings/gameover.wav"); // 게임 오버 소리 재생
             JOptionPane.showMessageDialog(this, "게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
             resetGame();
             return;
@@ -512,10 +576,6 @@ private void drawBlock(int rotation) {
         }
     }
 }
-
-
-
-
 
 
 // 블록 색을 설정하는 메소드
@@ -683,11 +743,6 @@ private void fixBlock() {
     startFallingBlock(); // 새로운 블록 시작
 }
 
-
-
-
-
-
 // 진행 상황 라벨 업데이트
 private void updateProgress() {
     progressLabel.setText(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
@@ -764,6 +819,7 @@ private void handleRewards(int difficulty) {
 
 private void erin() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+    musicManager.playMusic("sings/knife.wav");
 
     // 기존 블록 제거
     clearCurrentBlock();
@@ -811,13 +867,9 @@ private void deleteCollidedBlock(int x, int y) {
     }
 }
 
-
-
-
-
-
 private void reon() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
+    musicManager.playMusic("sings/knife2.wav");
 
     // 가장 높은 블록과 낮은 블록의 Y 좌표를 찾기
     int highestBlock = 19; // 초기값: 가장 낮은 위치
@@ -867,8 +919,8 @@ private void reon() {
 
     // easyLabel에 방패 이미지 추가
     easyLabel.add(shieldLabel);
-    easyLabel.revalidate(); // 레이아웃 갱신
-    easyLabel.repaint();    // 화면 갱신
+    easyLabel.revalidate(); 
+    easyLabel.repaint();   
 
     // 항상 0.5초 동안 방패 이미지가 보이도록 설정
     int shieldTime = 500; // 0.5초 (500ms)
@@ -886,11 +938,11 @@ private void reon() {
 
     abilityUsed = true; // 능력 사용 처리
 }
-//
 
 
 private void serena() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+    musicManager.playMusic("sings/wizard.wav");
 
     // 현재 블록 삭제
     clearCurrentBlock();
@@ -942,23 +994,6 @@ private void setBlockImage(ImageIcon icon, int x, int y) {
 }
 
 
-
-private void updateAbilityImagePosition() {
-    if (abilityImageLabel != null) {
-        int blockWidth = cellLabels[0][0].getWidth();  // 블록 크기
-        int blockHeight = cellLabels[0][0].getHeight();
-
-        // 라벨 위치를 블록 위치에 맞게 조정
-        int x = gameLabel.getX() + currentY * blockWidth;
-        int y = gameLabel.getY() + currentX * blockHeight;
-
-        abilityImageLabel.setBounds(x, y, blockWidth, blockHeight);
-        abilityImageLabel.setVisible(true); // 이미지를 항상 보이게 설정
-    }
-}
-
-
-
 // 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거
 private void removeSurroundingBlocks(int centerX, int centerY) {
     int startX = Math.max(centerX - 2, 0);
@@ -981,23 +1016,15 @@ private void removeSurroundingBlocks(int centerX, int centerY) {
 }
 
 
-
-
-
-
-
-
 private void ruminel() {
     if (!revived) { // 부활 가능 여부 확인
-        // 상단 적당히 제거
+        musicManager.playMusic("sings/nun.wav");
         for (int i = 0; i < 15; i++) { // 상단 10줄 제거
             for (int j = 0; j < 10; j++) {
                 board[i][j] = 0; // 보드 데이터 초기화
                 cellLabels[i][j].setBackground(Color.BLACK); // 라벨 색상 초기화
             }
         }
-
-        // 하단 절반 유지 (아무 작업도 하지 않음)
 
         // 능력 라벨 숨기기
         abilitylabel.setVisible(false);
@@ -1019,7 +1046,10 @@ private void ruminel() {
 
 
 private void sily() {
+    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
     abilitylabel.setVisible(false); // 기존 능력 관련 레이블 숨김
+
+    musicManager.playMusic("sings/slime_sound.wav");
 
     // 슬라임 캐릭터 이미지를 red_slime 이미지로 변경
     ImageIcon redSlimeIcon = new ImageIcon("images/ability/red_slime.png"); // 새로운 이미지 로드
@@ -1029,7 +1059,10 @@ private void sily() {
     Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
     redSlimeIcon = new ImageIcon(scaledImg); // 조정된 이미지를 다시 아이콘으로 저장
     chlabel.setIcon(redSlimeIcon); // chlabel의 이미지를 새로운 이미지로 변경
+
+    abilityUsed = true;
 }
+
 // 보드를 초기화하여 화면을 비운다
 private void clearBoard() {
     for (int i = 0; i < 20; i++) {
@@ -1041,9 +1074,6 @@ private void clearBoard() {
         }
     }
 }
-
-
-
 
     private void updateBackgroundImage() {
         int width = getWidth();

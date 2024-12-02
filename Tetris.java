@@ -236,8 +236,10 @@ public class Tetris extends JFrame {
     
         // 새로운 설명을 표시할 라벨 추가
         JLabel descriptionLabel = new JLabel("");
-        descriptionLabel.setBounds(430, 180, 400, 500); // 설명 위치 및 크기 조정
-        descriptionLabel.setForeground(Color.WHITE);
+        descriptionLabel.setBounds(430, 180, 400, 400); // 설명 위치 및 크기 조정
+        descriptionLabel.setOpaque(true);
+        descriptionLabel.setBackground(Color.LIGHT_GRAY);
+        descriptionLabel.setForeground(Color.black);
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
         charSelectionPanel.add(descriptionLabel);
@@ -250,7 +252,7 @@ public class Tetris extends JFrame {
         
             "직업: 원소 마법사(Elemental Mage) / 화염 전문가\n\n나이: 24세\n\n출신지: 아르카디아의 외곽 마을, 에텔로스(Ethelos)\n\n역할: 강력한 마법 딜러, 전략적인 제압 스페셜리스트\n\n셀레나는 평화로운 에텔로스 마을에서 태어났지만,\n\n 그녀가 8살이 되던 해,\n 마을은 정체불명의 마족의 습격으로 전멸당했습니다.\n 그녀는 화염 속에서 기적적으로 살아남았으며,\n 이후 자신의 내면에\n 원소 마법의 재능이 깃들어 있다는 것을 알게 되었습니다.\n\n 그녀의 고향이 불타오르는 장면은 셀레나의 트라우마이지만,\n 동시에 그녀의 가장 큰 힘의 원천이기도 합니다.",
         
-            "직업: 성녀 (Saint) / 치유와 축복의 사제\n\n나이: 19세\n\n출신지: 신성 제국, 일루미네르 수도\n\n역할: 치유와 보호, 파티의 정신적 지주\n\n루미엘은 태어날 때부터 \n신성한 빛에 선택받은 축복받은 아이로,\n 일루미네르 성당에서 자랐습니다.\n 그녀의 부모는 이름 없는 농민이었지만,\n 그녀가 태어난 날 밤 \n하늘에 빛나는 성운이 나타나\n 그녀의 신성한 운명을 예고했습니다.\n\n 어린 시절부터 치유의 기적을 보여준\n 그녀는 신성 제국의 주목을 받았고,\n 성녀로서 수련을 받게 되었습니다.\n\n 그러나 그녀는 \n단순히 신성한 역할에 만족하지 않고,\n 자신의 힘으로 사람들을 진정으로 돕고 싶어했습니다.",
+            "직업: 성녀 (Saint) / 치유와 축복의 사제\n\n나이: 19세\n\n출신지: 신성 제국, 일루미네르 수도\n\n역할: 치유와 보호, 파티의 정신적 지주\n\n루미엘은 태어날 때부터 \n신성한 빛에 선택받은 축복받은 아이로,\n 일루미네르 성당에서 자랐습니다.\n 그녀의 부모는 이름 없는 농민이었지만,\n 그녀가 태어난 날 밤 \n하늘에 빛나는 성운이 나타나\n 그녀의 신성한 운명을 예고했습니다.\n\n 어린 시절부터 치유의 기적을 보여준\n 그녀는 신성 제국의 주목을 받았고,\n 성녀로서 수련을 받게 되었습니다.\n\n 그러나 그녀는 단순히 역할에 만족하지 않고\n 자신의 힘으로 사람들을 진정으로 돕고 싶어했습니다.",
         
             "종족: 마법 슬라임\n\n성별: 없음 \n(하지만 모든 파티원이 각각 다르게 부릅니다. \n루미엘은 '그 아이', \n셀레나는 '얘', \n레온은 '녀석', \n에린은 '슬리'로 부름.)\n\n나이: 추정 불가 (외관상 아기처럼 보임)\n\n출신지: 불명의 고대 유적 (마법으로 태어난 존재)\n\n역할: 파티의 귀여운 마스코트이자, \n서포터 겸 의외의 전투원\n\n슬리는 원래 고대 유적지에서 잠들어 있던 존재로,\n 루미엘이 처음으로 발견했습니다.\n\n 유적의 신성한 에너지가 반응하며 \n슬라임이 생명체로 깨어났고,\n 파티원들과 함께 행동하기 시작했습니다."
         };

@@ -26,14 +26,12 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false,abilityUsed = false,isGameOverSoundPlayed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false,abilityUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private String selectedCharacter = ""; // 선택된 캐릭터
-    private ImageIcon swordBlockIcon; // 검사의 특수 블록 이미지
-    private JLabel abilityImageLabel; // 능력 블록 이미지를 표시할 라벨
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
     private String[] imagePaths = {
             "images/ch/man_1.png",
@@ -41,13 +39,6 @@ public class Tetris extends JFrame {
             "images/ch/woman_1.png",
             "images/ch/woman_2.png",
             "images/ch/slime.png"
-    };
-    private String[] musicFilePaths = {
-        "sings/knife.wav",   // 첫 번째 캐릭터의 음악 파일 경로
-        "sings/knife2.wav",   // 두 번째 캐릭터의 음악 파일 경로
-        "sings/wizard.wav", // 세 번째 캐릭터의 음악 파일 경로
-        "sings/nun.wav",// 네 번째 캐릭터의 음악 파일 경로
-        "sings/slime.wav"    // 다섯 번째 캐릭터의 음악 파일 경로
     };
     private MusicManager musicManager = new MusicManager();
     

@@ -41,6 +41,15 @@ public class Tetris extends JFrame {
             "images/ch/slime.png"
     };
     private MusicManager musicManager = new MusicManager();
+    // 현재 난이도에 맞는 배경음악 경로 반환
+    private String getBackgroundMusicForCurrentDifficulty() {
+        return switch (currentDifficulty) {
+            case 1 -> "sings/easy.wav";
+            case 2 -> "sings/hard.wav";
+            case 3 -> "sings/normal.wav";
+            default -> null;
+        };
+    }
     
 
     // SHAPE 배열은 그대로 두고, 랜덤으로 블록을 선택할 예정입니다.
@@ -814,6 +823,14 @@ private void erin() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
     musicManager.playMusic("sings/knife.wav");
 
+    // 효과음 종료 후 배경음악 재생
+    musicManager.clip.addLineListener(event -> {
+        if (event.getType() == LineEvent.Type.STOP) {
+            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+        }
+    });
+    
+
     // 기존 블록 제거
     clearCurrentBlock();
 
@@ -863,6 +880,12 @@ private void deleteCollidedBlock(int x, int y) {
 private void reon() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
     musicManager.playMusic("sings/knife2.wav");
+
+    musicManager.clip.addLineListener(event -> {
+        if (event.getType() == LineEvent.Type.STOP) {
+            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+        }
+    });
 
     // 가장 높은 블록과 낮은 블록의 Y 좌표를 찾기
     int highestBlock = 19; // 초기값: 가장 낮은 위치
@@ -936,6 +959,12 @@ private void reon() {
 private void serena() {
     if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
     musicManager.playMusic("sings/wizard.wav");
+
+    musicManager.clip.addLineListener(event -> {
+        if (event.getType() == LineEvent.Type.STOP) {
+            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+        }
+    });
 
     // 현재 블록 삭제
     clearCurrentBlock();
@@ -1019,6 +1048,12 @@ private void ruminel() {
             }
         }
 
+        musicManager.clip.addLineListener(event -> {
+            if (event.getType() == LineEvent.Type.STOP) {
+                musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            }
+        });
+
         // 능력 라벨 숨기기
         abilitylabel.setVisible(false);
 
@@ -1043,6 +1078,12 @@ private void sily() {
     abilitylabel.setVisible(false); // 기존 능력 관련 레이블 숨김
 
     musicManager.playMusic("sings/slime_sound.wav");
+
+    musicManager.clip.addLineListener(event -> {
+        if (event.getType() == LineEvent.Type.STOP) {
+            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+        }
+    });
 
     // 슬라임 캐릭터 이미지를 red_slime 이미지로 변경
     ImageIcon redSlimeIcon = new ImageIcon("images/ability/red_slime.png"); // 새로운 이미지 로드

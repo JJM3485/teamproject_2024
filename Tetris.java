@@ -652,7 +652,9 @@ private void moveBlockDown() {
 
 // 블록 이동 여부 체크
 private boolean canMove(int x, int y) {
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] {
+        {1, 1}, {1, 1}, {1, 1}, {1, 1} // 에린 특수 블록(-2 타입)
+    };
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
@@ -660,20 +662,16 @@ private boolean canMove(int x, int y) {
                 int newX = x + i;
                 int newY = y + j;
 
-                // 경계를 벗어나거나 고정된 블록과 충돌 확인
-                if (newX >= 20 || newY < 0 || newY >= 10) {
-                    return false;
-                }
-
-                // 능력 블록은 다른 블록과의 충돌을 무시
-                if (blockType != -2 && board[newX][newY] == 1) {
+                // 경계를 벗어나거나 고정된 블록과 충돌 여부 확인
+                if (newX >= 20 || newY < 0 || newY >= 10 || (blockType != -2 && board[newX][newY] == 1)) {
                     return false;
                 }
             }
         }
     }
-    return true; // 이동 가능
+    return true;
 }
+
 
 
 
@@ -861,12 +859,12 @@ private void deleteCollidedBlock(int x, int y) {
     for (int i = 0; i < erinBlockShape.length; i++) {
         for (int j = 0; j < erinBlockShape[i].length; j++) {
             if (erinBlockShape[i][j] == 1) {
-                int checkX = x + i;
-                int checkY = y + j;
+                int checkX = x + i; // 현재 X 위치
+                int checkY = y + j; // 현재 Y 위치
 
-                // 보드 범위 확인
+                // 보드 범위를 벗어나지 않도록 체크
                 if (checkX >= 0 && checkX < 20 && checkY >= 0 && checkY < 10) {
-                    if (board[checkX][checkY] == 1) { // 고정된 블록이 존재하면
+                    if (board[checkX][checkY] == 1) { // 고정된 블록이 있다면
                         board[checkX][checkY] = 0; // 보드에서 제거
                         cellLabels[checkX][checkY].setBackground(Color.BLACK); // UI 초기화
                         cellLabels[checkX][checkY].setIcon(null); // 아이콘 제거
@@ -1238,24 +1236,19 @@ private void clearBoard() {
         }
     
         // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
-        // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
         private void dropBlockInstantly() {
-            // 블록이 더 이상 내려갈 수 없을 때까지 내려보낸다
-            while (canMove(currentX + 1, currentY)) {
-                currentX++; // 아래로 한 칸 내려가기
+            if (blockType == -2) { // 에린 능력 블록인 경우
+                return;
+            } else {
+                // 일반 블록 처리
+                while (canMove(currentX + 1, currentY)) {
+                    currentX++; // 아래로 한 칸 내려감
+                }
+                // 일반 블록 고정
+                fixBlock();
+                startFallingBlock();
             }
-
-    // 블록이 도착한 위치에서 추가 동작 처리
-            if (blockType == -1) {
-                // 셀레나의 능력 블록일 경우, 주변 블록 제거
-                removeSurroundingBlocks(currentX, currentY);
-            }
-
-            // 블록을 고정시키고, 새로운 블록을 시작
-            fixBlock();
-            startFallingBlock();
         }
-
     }
 
     // 한 줄이 다 채워졌는지 확인하고, 채워졌으면 그 줄을 지우고 위의 줄을 내린다.

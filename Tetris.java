@@ -568,7 +568,11 @@ private void drawBlock(int rotation) {
                         // 능력 블록인 경우 이미지 설정
                         ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
                         setBlockImage(fireIcon, x, y);
-                    } else {
+                    } else if(blockType == -2) {
+                        ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
+                        setBlockImage(swordIcon, x, y);
+                    }
+                    else {
                         // 일반 블록인 경우 색상 설정
                         cellLabels[x][y].setBackground(getColorForBlock(blockType));
                         cellLabels[x][y].setIcon(null);
@@ -827,7 +831,6 @@ private void erin() {
             musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
         }
     });
-    
 
     // 기존 블록 제거
     clearCurrentBlock();
@@ -838,6 +841,9 @@ private void erin() {
     currentX = 0; // 최상단에서 시작
     currentY = 3; // 중앙 정렬
 
+    ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
+    setBlockImage(swordIcon, currentX, currentY);
+
     // 능력 블록 화면 표시
     drawBlock(rotation);
 
@@ -846,15 +852,9 @@ private void erin() {
 }
 
 
-
 private void deleteCollidedBlock(int x, int y) {
     // 에린의 능력 블록 크기 (4x2)
-    int[][] erinBlockShape = {
-        {1, 1},
-        {1, 1},
-        {1, 1},
-        {1, 1}
-    };
+    int[][] erinBlockShape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1,1},{1,1},{1,1},{1,1} };
 
     for (int i = 0; i < erinBlockShape.length; i++) {
         for (int j = 0; j < erinBlockShape[i].length; j++) {

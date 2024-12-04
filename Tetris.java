@@ -225,8 +225,8 @@ public class Tetris extends JFrame {
         charSelectionPanel.setLayout(null);
         charSelectionPanel.setBounds(0, 0, getWidth(), getHeight());
     
-        JLabel charLabel = new JLabel("캐릭터를 선택하세요!");
-        charLabel.setBounds(300, 50, 200, 50);
+        JLabel charLabel = new JLabel("각각의 고유 능력을 지닌 캐릭터를 선택하세요!");
+        charLabel.setBounds(280, 50, 300, 50);
         charLabel.setForeground(Color.WHITE);
         charLabel.setHorizontalAlignment(SwingConstants.CENTER);
         charSelectionPanel.add(charLabel);

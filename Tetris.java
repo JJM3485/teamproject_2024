@@ -768,6 +768,8 @@ private void updateProgress() {
 
 // 게임 재시작을 위한 메소드 수정
 private void resetGame() {
+    musicManager.stopMusic();
+    
     // 제한시간 초기화
     remainingTime = 180;
     revived = false;

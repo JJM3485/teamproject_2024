@@ -634,7 +634,7 @@ private void moveBlockDown() {
             }
         } else {
             if (blockType == -1) {
-                // 능력 블록인 경우 즉시 발동
+                // 능력 블록인 경우 즉시 발동 즉시발동이 아니지. 바닥에 닿으면. 다른 블록에 닿거나. 이 부분이 문제인듯함
                 removeSurroundingBlocks(currentX, currentY);
         
                 // 다음 블록으로 전환

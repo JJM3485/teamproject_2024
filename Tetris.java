@@ -601,6 +601,32 @@ private Color getColorForBlock(int blockType) {
 
 // 블록을 아래로 이동
 private void moveBlockDown() {
+
+    if (blockType == -1) { // Serena의 능력 블록일 경우
+        // 능력 블록이 아래로 이동할 수 있는지 확인
+        if (canMove(currentX + 1, currentY)) {
+            currentX++; // 이동 가능하면 아래로 이동
+            drawBlock(rotation); // 블록 다시 그리기
+        } else {
+            // 이동 불가능한 경우에만 블록 제거 및 다음 블록으로 전환
+            removeSurroundingBlocks(currentX, currentY);
+
+            blockType = nextBlockType;
+            Random rand = new Random();
+            nextBlockType = rand.nextInt(SHAPE.length); // 새 블록 랜덤 설정
+            showNextBlock(); // 다음 블록 표시
+            startFallingBlock(); // 새로운 블록 시작
+        }
+    } else if (blockType != -2){
+        // 일반 블록 처리
+        if (canMove(currentX + 1, currentY)) {
+            currentX++; // 이동 가능하면 아래로 이동
+            drawBlock(rotation);
+        } else {
+            fixBlock(); // 이동 불가능하면 블록 고정
+        }
+    }
+
     if (blockType == -2) { // 에린의 능력 블록일 경우
             // 이동 중 충돌한 블록을 삭제
         deleteCollidedBlock(currentX, currentY);
@@ -633,20 +659,9 @@ private void moveBlockDown() {
                 setBlockImage(fireIcon, currentX, currentY);
             }
         } else {
-            if (blockType == -1) {
-                // 능력 블록인 경우 즉시 발동 즉시발동이 아니지. 바닥에 닿으면. 다른 블록에 닿거나. 이 부분이 문제인듯함
-                removeSurroundingBlocks(currentX, currentY);
-        
-                // 다음 블록으로 전환
-                blockType = nextBlockType;
-                Random rand = new Random();
-                nextBlockType = rand.nextInt(SHAPE.length);
-                showNextBlock(); // 다음 블록 표시
-                startFallingBlock(); // 새로운 블록 시작
-            } else{
                 fixBlock(); // 일반 블록은 고정
             }
-        }
+        
 
     }
     
@@ -656,9 +671,7 @@ private void moveBlockDown() {
 
 // 블록 이동 여부 체크
 private boolean canMove(int x, int y) {
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] {
-        {1, 1}, {1, 1}, {1, 1}, {1, 1} // 에린 특수 블록(-2 타입)
-    };
+    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} }; // Serena 능력 블록의 모양
 
     for (int i = 0; i < shape.length; i++) {
         for (int j = 0; j < shape[i].length; j++) {
@@ -667,14 +680,15 @@ private boolean canMove(int x, int y) {
                 int newY = y + j;
 
                 // 경계를 벗어나거나 고정된 블록과 충돌 여부 확인
-                if (newX >= 20 || newY < 0 || newY >= 10 || (blockType != -2 && board[newX][newY] == 1)) {
-                    return false;
+                if (newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
+                    return false; // 이동 불가
                 }
             }
         }
     }
-    return true;
+    return true; // 이동 가능
 }
+
 
 
 
@@ -968,7 +982,7 @@ private void serena() {
     clearCurrentBlock();
 
     // 능력 블록 설정
-    blockType = -1; // 셀레나의 특수 블록 타입
+    blockType = -1; // Serena의 특수 블록 타입
     rotation = 0;
     currentX = 0; // 화면 최상단
     currentY = 4; // 중앙에서 시작
@@ -981,6 +995,7 @@ private void serena() {
     abilityUsed = true;
     abilitylabel.setVisible(false); // 능력 버튼 숨김
 }
+
 
 private void clearCurrentBlock() {
     int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
@@ -1034,6 +1049,7 @@ private void removeSurroundingBlocks(int centerX, int centerY) {
     cellLabels[centerX][centerY].setBackground(Color.BLACK);
     cellLabels[centerX][centerY].setIcon(null);
 }
+
 
 
 private void ruminel() {

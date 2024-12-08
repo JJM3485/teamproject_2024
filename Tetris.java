@@ -11,9 +11,9 @@ import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Tetris extends JFrame {
-    private JLabel label, gameLabel, easyLabel;
+    private JLabel label, gameLabel, easyLabel,overlayLabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
-    private ImageIcon originalIcon, easyIcon,chIcon,abIcon;
+    private ImageIcon originalIcon, easyIcon,chIcon,abIcon,overlayImageIcon;
     private Timer timer;
     private boolean isEasyCleared = false,isMediumCleared = false,isHardCleared = false;
     private int gameSpeed = 500;
@@ -432,8 +432,18 @@ public class Tetris extends JFrame {
         explainlabel.setOpaque(true); // 배경을 보이게 설정
         explainlabel.setBackground(Color.black); // 디버깅용 배경색 추가
         easyLabel.add(explainlabel);
+
+        overlayImageIcon = new ImageIcon("images/ch/devil.png"); // 미리 로드
+        overlayLabel = new JLabel(overlayImageIcon);
+        overlayLabel.setBounds(0, 0, getWidth(), getHeight());
+        overlayLabel.setOpaque(false);
+        overlayLabel.setVisible(false);
+        easyLabel.add(overlayLabel);
+    
+
+
         
-        //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.abIcon ability label 550, 130, 100, 50
+        //능력에 대한 이미지를 넣고 사용지 없는것처럼 보이게 할 겁니다.
         abilitylabel = new JLabel(abIcon);
         abilitylabel.setBounds(550, 130, 100, 50); // 위치와 크기 설정
         abilitylabel.setOpaque(false); // 배경을 보이게 설정
@@ -711,6 +721,18 @@ private boolean isGameOver() {
 }
 
 
+
+private void showOverlayImage(int durationMillis) {
+    overlayLabel.setVisible(true); // 이미지 표시
+    Timer timer = new Timer(durationMillis, e -> {
+        overlayLabel.setVisible(false); // 1초 후 숨김
+    });
+    timer.setRepeats(false);
+    timer.start();
+}
+
+
+
 private void fixBlock() {
     if (blockType == -1) {
         // 능력 블록일 경우 주변 블록 제거
@@ -756,6 +778,7 @@ private void fixBlock() {
     if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
         isDirectionLocked = true; // 방향키 잠금
         lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
+        showOverlayImage(1000);
     }
     
     // 잠금 상태에서 떨어진 블록 카운트

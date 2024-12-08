@@ -779,6 +779,13 @@ private void fixBlock() {
         isDirectionLocked = true; // 방향키 잠금
         lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
         showOverlayImage(1000);
+        musicManager.playMusic("sings/devil_sound.wav");
+
+        musicManager.clip.addLineListener(event -> {
+            if (event.getType() == LineEvent.Type.STOP) {
+                musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            }
+        });
     }
     
     // 잠금 상태에서 떨어진 블록 카운트

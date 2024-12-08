@@ -21,12 +21,12 @@ public class Tetris extends JFrame {
     private final int initialHeight = 800;
     private int[][] board = new int[20][10];
     private JLabel[][] cellLabels = new JLabel[20][10];
-    private int currentX, currentY, rotation = 0;
+    private int currentX, currentY, rotation = 0,lockedBlocksCount = 0;
     private Color currentColor = Color.BLUE;
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false,abilityUsed = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false,abilityUsed = false,isDirectionLocked = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
@@ -361,7 +361,6 @@ public class Tetris extends JFrame {
             case 2 -> "sings/hard.wav"; // 난이도 중
             case 3 -> "sings/normal.wav";  // 난이도 상
             default -> {
-                System.err.println("Invalid difficulty level");
                 yield null; // null 반환 방지
             }
         };
@@ -753,6 +752,21 @@ private void fixBlock() {
         return;
     }
 
+    // 방향키 잠금 활성화 조건
+    if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
+        isDirectionLocked = true; // 방향키 잠금
+        lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
+    }
+    
+    // 잠금 상태에서 떨어진 블록 카운트
+    if (isDirectionLocked) {
+        lockedBlocksCount++;
+        if (lockedBlocksCount > 2) {
+            isDirectionLocked = false; // 블록 2개가 떨어지면 잠금 해제
+        }
+    }
+    
+
     blockType = nextBlockType; // 현재 블록을 다음 블록으로 설정
     Random rand = new Random();
     nextBlockType = rand.nextInt(SHAPE.length);
@@ -1140,6 +1154,10 @@ private void clearBoard() {
     private class TetrisKeyListener extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
+            if (isDirectionLocked) {
+                return; // 방향키 입력을 무시
+            }
+    
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT: // 왼쪽 이동
                     if (canMove(currentX, currentY - 1)) {

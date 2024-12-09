@@ -26,7 +26,7 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false,abilityUsed = false,isDirectionLocked = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,revived = false,abilityUsed = false,isDirectionLocked = false,check = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
@@ -292,6 +292,10 @@ public class Tetris extends JFrame {
         confirmButton.addActionListener(e -> {
             if (!selectedCharacter.isEmpty()) {
                 JOptionPane.showMessageDialog(this, selectedCharacter + "로 게임을 시작합니다!", "캐릭터 선택 완료", JOptionPane.INFORMATION_MESSAGE);
+                if (check == false) {
+                    JOptionPane.showMessageDialog(this, "블럭이 20, 40, 60마다 장애물이 생깁니다!", "장애물 팁", JOptionPane.INFORMATION_MESSAGE);
+                    check = true;
+                }
                 startGame(speed, difficulty,selectedCharacter);
             } else {
                 JOptionPane.showMessageDialog(this, "캐릭터를 선택해주세요!", "오류", JOptionPane.WARNING_MESSAGE);

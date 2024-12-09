@@ -851,35 +851,35 @@ private void fixBlock() {
 
 // 랜덤 이미지 배치하는 함수
 private void generateRandomObstacle() {
-    
-    // 2. 모든 블록을 2칸 위로 이동
-     
-    for (int y = 2; y <= 20; y++) { // y=18부터 y=2까지 역순으로 순회
+    Random rand = new Random();
+
+    // 모든 블록을 2칸 위로 이동
+    for (int y = 2; y < 20; y++) { // 아래에서 위로 이동
         for (int x = 0; x < 10; x++) {
-            if (board[y][x] == 1) { // 현재 위치에 블록이 있으면
-                int newY = y - 2; // 두 칸 위로 이동
-    
-                // 새 위치가 유효하고 빈 공간인지 확인
-                if (newY >= 0 && board[newY][x] == 0) {
-                    // 블록 이동
-                    board[newY][x] = 1; // 새 위치에 블록 상태 갱신
-                    cellLabels[newY][x].setIcon(cellLabels[y][x].getIcon()); // 이미지 복사
-                    cellLabels[newY][x].setBackground(cellLabels[y][x].getBackground()); // 배경색 복사
-    
-                    // 기존 위치 초기화 (이미 올라갔다면 해당 위치를 비워둠)
-                    board[y][x] = 0;
-                    cellLabels[y][x].setIcon(null); // 이미지 제거
-                    cellLabels[y][x].setBackground(Color.BLACK); // 배경색 검정색으로 초기화
-                    
-                         // 화면 갱신
-                        cellLabels[y][x].revalidate();
-                        cellLabels[y][x].repaint();
-                    
-                }
+            board[y - 2][x] = board[y][x];
+            cellLabels[y - 2][x].setBackground(cellLabels[y][x].getBackground());
+            cellLabels[y][x].setBackground(Color.BLACK); // 기존 위치 초기화
+            board[y][x] = 0;
+        }
+    }
+
+    // 두 줄의 빨간색 장애물 생성
+    for (int y = 18; y < 20; y++) { // 하단 두 줄(18, 19)
+        int emptyIndex = rand.nextInt(10); // 각 줄에 1x1 빈 자리 생성
+        for (int x = 0; x < 10; x++) {
+            if (x == emptyIndex) {
+                // 빈 칸 설정
+                board[y][x] = 0;
+                cellLabels[y][x].setBackground(Color.BLACK);
+            } else {
+                // 빨간색 블록 설정
+                board[y][x] = 1;
+                cellLabels[y][x].setBackground(Color.RED);
             }
         }
     }
 }
+
 
 // 진행 상황 라벨 업데이트
 private void updateProgress() {

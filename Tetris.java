@@ -26,7 +26,7 @@ public class Tetris extends JFrame {
     private int blockType,nextBlockType;
     private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,revived = false,abilityUsed = false,isDirectionLocked = false,check = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
+    private boolean holdUsed = false,abilityUsed = false,isDirectionLocked = false,check = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
@@ -731,7 +731,7 @@ private boolean isGameOver() {
         for (int j = 0; j < shape[i].length; j++) {
             if (shape[i][j] == 1 && board[currentX + i][currentY + j] == 1) {
                 // 게임 오버 상태에서 성녀 부활 기능 체크
-                if (selectedCharacter.equals("루미엘") && !revived) {
+                if (selectedCharacter.equals("루미엘") && !abilityUsed) {
                     ruminel(); // 외부 클래스의 메서드 호출
                     return false; // 게임 오버 방지
                 }
@@ -892,8 +892,7 @@ private void resetGame() {
     
     // 제한시간 초기화
     remainingTime = 180;
-    revived = false;
-    abilityUsed = false; // 레온의 능력 초기화
+    abilityUsed = false;
     // 제한시간 타이머 중지
     if (countdownTimer != null) {
         countdownTimer.stop();
@@ -1175,7 +1174,7 @@ private void removeSurroundingBlocks(int centerX, int centerY) {
 
 
 private void ruminel() {
-    if (!revived) { // 부활 가능 여부 확인
+    if (!abilityUsed) { // 부활 가능 여부 확인
         musicManager.playMusic("sings/nun.wav");
         for (int i = 0; i < 15; i++) { // 상단 10줄 제거
             for (int j = 0; j < 10; j++) {
@@ -1194,7 +1193,7 @@ private void ruminel() {
         abilitylabel.setVisible(false);
 
         // 부활 상태 기록
-        revived = true;
+        abilityUsed = true;
 
         // UI 갱신
         revalidate();

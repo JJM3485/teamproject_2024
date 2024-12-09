@@ -442,6 +442,7 @@ public class Tetris extends JFrame {
         easyLabel.add(scoreLabel); // 게임 화면에 추가s
 
         explainlabel = new JLabel("<html>Z : 블록 다운<br>X : 홀딩<br>C : 능력 사용</html>");
+        if (selectedCharacter.equals("루미엘")) {explainlabel.setText("<html>Z : 블록 다운<br>X : 홀딩<br>능력 사용 : 패시브</html>");}
         explainlabel.setBounds(400, 580, 100, 100); // 위치와 크기 설정
         explainlabel.setForeground(Color.WHITE); // 글자 색상 설정
         explainlabel.setOpaque(true); // 배경을 보이게 설정

@@ -814,10 +814,14 @@ private void fixBlock() {
 
     // 방향키 잠금 활성화 조건
     if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
-        generateRandomObstacle();
+        int randomInt = (int) (Math.random() * 2) + 1; // 1에서 10 사이의 정수
+        if (randomInt == 1) {
+            isDirectionLocked = true; // 방향키 잠금
+            lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
+        } else if (randomInt == 2) {
+            generateRandomObstacle();
+        }
         
-        //isDirectionLocked = true; // 방향키 잠금
-        //lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
         showOverlayImage(1000);
         musicManager.playMusic("sings/devil_sound.wav");
 

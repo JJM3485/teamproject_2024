@@ -11,7 +11,7 @@ import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Tetris extends JFrame {
-    private JLabel label, gameLabel, easyLabel,overlayLabel;
+    private JLabel label, gameLabel, easyLabel,overlayLabel,scoreLabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
     private ImageIcon originalIcon, easyIcon,chIcon,abIcon,overlayImageIcon;
     private Timer timer;
@@ -30,7 +30,9 @@ public class Tetris extends JFrame {
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
     private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
+    private int totalScore = 0,highestScore = 0; // 총 점수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
+    private long blockStartTime;
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
     private String[] imagePaths = {
@@ -340,6 +342,8 @@ public class Tetris extends JFrame {
             if (remainingTime <= 0) {
                 countdownTimer.stop();
                 timer.stop();
+                musicManager.stopMusic();  // 게임 오버 후 음악 멈추기
+                musicManager.playMusic("sings/gameover.wav"); // 게임 오버 소리 재생
                 JOptionPane.showMessageDialog(this, "시간 초과! 게임 오버!", "알림", JOptionPane.INFORMATION_MESSAGE);
                 resetGame(); // 게임 초기화
             }
@@ -425,6 +429,17 @@ public class Tetris extends JFrame {
         progressLabel.setOpaque(true); // 배경을 보이게 설정
         progressLabel.setBackground(Color.BLACK);
         easyLabel.add(progressLabel);
+
+        if (totalScore > highestScore) {
+            highestScore = totalScore;
+        }
+        totalScore = 0;
+        scoreLabel = new JLabel(String.format("<html>현재점수/최고점수<br> %d / %d", totalScore, highestScore));
+        scoreLabel.setBounds(400, 520, 100, 50); // 위치와 크기 설정
+        scoreLabel.setForeground(Color.WHITE); // 글자 색상 설정
+        scoreLabel.setOpaque(true); // 배경 활성화
+        scoreLabel.setBackground(Color.BLACK); // 배경색 설정
+        easyLabel.add(scoreLabel); // 게임 화면에 추가s
 
         explainlabel = new JLabel("<html>Z : 블록 다운<br>X : 홀딩<br>C : 능력 사용</html>");
         explainlabel.setBounds(400, 580, 100, 100); // 위치와 크기 설정
@@ -761,10 +776,28 @@ private void fixBlock() {
 
     clearFullLines(); // 줄 삭제 확인
 
+    // 블록 내려온 시간 측정 및 점수 계산
+    long blockEndTime = System.currentTimeMillis();
+    long elapsedTime = (blockEndTime - blockStartTime) / 1000; // 초 단위로 변환
+        
+    int blockScore = 0;
+    if (elapsedTime <= 2) {
+        blockScore = 5;
+    } else if (elapsedTime <= 5) {
+        blockScore = 3;
+    } else {
+        blockScore = 1;
+    }
+    totalScore += blockScore;
+    //String.format("블록: %d / %d", clearedBlocks, totalBlocks)
+    scoreLabel.setText(String.format("<html>현재점수/최고점수<br> %d / %d", totalScore, highestScore));
+
     holdUsed = false; // 홀드 사용 가능 상태 초기화
 
     clearedBlocks++;
     updateProgress();
+
+    
 
     if (clearedBlocks >= totalBlocks) {
         timer.stop();

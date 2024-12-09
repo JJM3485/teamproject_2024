@@ -814,8 +814,10 @@ private void fixBlock() {
 
     // 방향키 잠금 활성화 조건
     if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
-        isDirectionLocked = true; // 방향키 잠금
-        lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
+        generateRandomObstacle();
+        
+        //isDirectionLocked = true; // 방향키 잠금
+        //lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
         showOverlayImage(1000);
         musicManager.playMusic("sings/devil_sound.wav");
 
@@ -841,6 +843,38 @@ private void fixBlock() {
 
     showNextBlock(); // 다음 블록 UI 갱신
     startFallingBlock(); // 새로운 블록 시작
+}
+
+// 랜덤 이미지 배치하는 함수
+private void generateRandomObstacle() {
+    
+    // 2. 모든 블록을 2칸 위로 이동
+     
+    for (int y = 2; y <= 20; y++) { // y=18부터 y=2까지 역순으로 순회
+        for (int x = 0; x < 10; x++) {
+            if (board[y][x] == 1) { // 현재 위치에 블록이 있으면
+                int newY = y - 2; // 두 칸 위로 이동
+    
+                // 새 위치가 유효하고 빈 공간인지 확인
+                if (newY >= 0 && board[newY][x] == 0) {
+                    // 블록 이동
+                    board[newY][x] = 1; // 새 위치에 블록 상태 갱신
+                    cellLabels[newY][x].setIcon(cellLabels[y][x].getIcon()); // 이미지 복사
+                    cellLabels[newY][x].setBackground(cellLabels[y][x].getBackground()); // 배경색 복사
+    
+                    // 기존 위치 초기화 (이미 올라갔다면 해당 위치를 비워둠)
+                    board[y][x] = 0;
+                    cellLabels[y][x].setIcon(null); // 이미지 제거
+                    cellLabels[y][x].setBackground(Color.BLACK); // 배경색 검정색으로 초기화
+                    
+                         // 화면 갱신
+                        cellLabels[y][x].revalidate();
+                        cellLabels[y][x].repaint();
+                    
+                }
+            }
+        }
+    }
 }
 
 // 진행 상황 라벨 업데이트

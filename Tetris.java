@@ -525,6 +525,8 @@ public class Tetris extends JFrame {
         rotation = 0;  // 초기 회전 상태
         currentX = 0;  // 초기 X 위치
         currentY = 3;  // 초기 Y 위치
+
+        blockStartTime = System.currentTimeMillis(); // 블록 시작 시간 기록
     
         currentColor = getColorForBlock(blockType); // 현재 블록의 색상 설정
     
@@ -785,15 +787,13 @@ private void fixBlock() {
     long blockEndTime = System.currentTimeMillis();
     long elapsedTime = (blockEndTime - blockStartTime) / 1000; // 초 단위로 변환
         
-    int blockScore = 0;
-    if (elapsedTime <= 2) {
-        blockScore = 5;
-    } else if (elapsedTime <= 5) {
-        blockScore = 3;
+    if (elapsedTime <= 0.5) {
+        totalScore += 5;
+    } else if (elapsedTime <= 1) {
+        totalScore += 3;
     } else {
-        blockScore = 1;
+        totalScore += 1;
     }
-    totalScore += blockScore;
     //String.format("블록: %d / %d", clearedBlocks, totalBlocks)
     scoreLabel.setText(String.format("<html>현재점수/최고점수<br> %d / %d", totalScore, highestScore));
 

@@ -238,9 +238,6 @@ public class Tetris extends JFrame {
         // 새로운 설명을 표시할 라벨 추가
         JLabel descriptionLabel = new JLabel("");
         descriptionLabel.setBounds(430, 180, 400, 400); // 설명 위치 및 크기 조정
-        descriptionLabel.setOpaque(true);
-        descriptionLabel.setBackground(Color.LIGHT_GRAY);
-        descriptionLabel.setForeground(Color.black);
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
         charSelectionPanel.add(descriptionLabel);
@@ -271,6 +268,9 @@ public class Tetris extends JFrame {
                 selectedCharacter = character;
                 charImageLabel.setIcon(scaleImageToLabel(new ImageIcon(imagePath), charImageLabel));
                 charDescLabel.setText(character); // 캐릭터 이름 변경
+                descriptionLabel.setOpaque(true);
+                descriptionLabel.setForeground(Color.black);
+                descriptionLabel.setBackground(Color.LIGHT_GRAY);
                 descriptionLabel.setText("<html>" + characterDescriptions[index].replace("\n", "<br>") + "</html>"); // 캐릭터 설명 변경
             });
             charSelectionPanel.add(button);

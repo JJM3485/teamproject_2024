@@ -11,27 +11,17 @@ import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Tetris extends JFrame {
-    private JLabel label, gameLabel, easyLabel,overlayLabel,scoreLabel;
+    private JLabel label, gameLabel, easyLabel,overlayLabel,scoreLabel,nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
     private JButton startButton, exitButton, easyButton, mediumButton, hardButton;
     private ImageIcon originalIcon, easyIcon,chIcon,abIcon,overlayImageIcon;
     private Timer timer;
-    private boolean isEasyCleared = false,isMediumCleared = false,isHardCleared = false;
-    private int gameSpeed = 500;
-    private final int initialWidth = 800;
-    private final int initialHeight = 800;
+    private boolean isEasyCleared = false,isMediumCleared = false,isHardCleared = false,holdUsed = false,abilityUsed = false,isDirectionLocked = false,check = false;
+    private final int initialWidth = 800,initialHeight = 800;
     private int[][] board = new int[20][10];
     private JLabel[][] cellLabels = new JLabel[20][10];
-    private int currentX, currentY, rotation = 0,lockedBlocksCount = 0;
+    private int currentX, currentY, blockType,nextBlockType,rotation = 0,lockedBlocksCount = 0,gameSpeed = 500,holdBlockType = -1,remainingTime = 180,totalScore = 0,highestScore = 0, totalBlocks = 70,clearedBlocks = 0,currentDifficulty;
     private Color currentColor = Color.BLUE;
-    private int blockType,nextBlockType;
-    private JLabel nextBlockLabel,holdLabel,timeLabel,progressLabel,chlabel,abilitylabel,explainlabel;
-    private int holdBlockType = -1; // 초기 상태, 홀드가 비어있음을 나타냄
-    private boolean holdUsed = false,abilityUsed = false,isDirectionLocked = false,check = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
-    private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 70,clearedBlocks = 0; // 전체 블록 수
-    private int totalScore = 0,highestScore = 0; // 총 점수
-    private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private long blockStartTime;
     private String selectedCharacter = ""; // 선택된 캐릭터
     private String[] characters = {"에린 카르테스", "레온 하르트", "셀레나", "루미엘", "슬리"};
@@ -1431,7 +1421,6 @@ private void removeLine(int row) {
 }
 
 // 해당 줄 위에 있는 줄들을 한 칸씩 아래로 내린다.
-// 줄을 아래로 내리는 로직 수정
 private void moveDownFullLines(int row) {
     for (int i = row - 1; i >= 0; i--) {
         for (int j = 0; j < 10; j++) {

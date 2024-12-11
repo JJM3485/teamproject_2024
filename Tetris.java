@@ -535,643 +535,474 @@ public class Tetris extends JFrame {
     }
     
 
-// 다음에 나타날 블럭을 nextBlockLabel에 표시하는 메소드
-private void showNextBlock() {
-    nextBlockLabel.removeAll(); // 기존 블록 지우기
+    // 다음에 나타날 블럭을 nextBlockLabel에 표시하는 메소드
+    private void showNextBlock() {
+        nextBlockLabel.removeAll(); // 기존 블록 지우기
 
-    if (nextBlockType != -1) {
-        int[][] shape = SHAPE[nextBlockType][0]; // 초기 회전 상태
+        if (nextBlockType != -1) {
+            int[][] shape = SHAPE[nextBlockType][0]; // 초기 회전 상태
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                JLabel cell = new JLabel();
-                cell.setOpaque(true);
-                if (shape[i][j] == 1) {
-                    cell.setBackground(getColorForBlock(nextBlockType)); // 색상 설정
-                } else {
-                    cell.setBackground(Color.BLACK); // 빈 칸은 검정
-                }
-                nextBlockLabel.add(cell);
-            }
-        }
-    }
-
-    nextBlockLabel.revalidate();
-    nextBlockLabel.repaint();
-}
-
-
-private void drawBlock(int rotation) {
-    clearBoard(); // 기존 블록의 셀만 초기화
-
-    int[][] shape;
-    if (blockType == -2) { // 에린의 능력 블록
-        shape = new int[][] {
-            {1, 1},
-            {1, 1},
-            {1, 1},
-            {1, 1},
-        };
-    } else if (blockType == -1) { // 셀레나의 능력 블록 (1x1 하얀 블록)
-        shape = new int[][] { {1} };
-    } else {
-        shape = SHAPE[blockType][rotation];
-    }
-
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                int x = currentX + i;
-                int y = currentY + j;
-
-                if (x >= 0 && x < 20 && y >= 0 && y < 10) {
-                    if (blockType == -1) {
-                        // 능력 블록인 경우 이미지 설정
-                        ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-                        setBlockImage(fireIcon, x, y);
-                    } else if(blockType == -2) {
-                        ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
-                        setBlockImage(swordIcon, x, y);
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    JLabel cell = new JLabel();
+                    cell.setOpaque(true);
+                    if (shape[i][j] == 1) {
+                        cell.setBackground(getColorForBlock(nextBlockType)); // 색상 설정
+                    } else {
+                        cell.setBackground(Color.BLACK); // 빈 칸은 검정
                     }
-                    else {
-                        // 일반 블록인 경우 색상 설정
-                        cellLabels[x][y].setBackground(getColorForBlock(blockType));
-                        cellLabels[x][y].setIcon(null);
-                    }
+                    nextBlockLabel.add(cell);
                 }
             }
         }
+
+        nextBlockLabel.revalidate();
+        nextBlockLabel.repaint();
     }
-}
 
 
-// 블록 색을 설정하는 메소드
-private Color getColorForBlock(int blockType) {
-    switch (blockType) {
-        case 0: return Color.CYAN;  // I
-        case 1: return Color.YELLOW; // O
-        case 2: return Color.GREEN;  // S
-        case 3: return Color.GRAY; // Z
-        case 4: return Color.BLUE;   // L
-        case 5: return Color.PINK;   // T
-        case 6: return Color.ORANGE; // J
-        default: return Color.WHITE; // 기본 값
-    }
-}
+    private void drawBlock(int rotation) {
+        clearBoard(); // 기존 블록의 셀만 초기화
 
-
-// 블록을 아래로 이동
-private void moveBlockDown() {
-
-    if (blockType == -1) { // Serena의 능력 블록일 경우
-        // 능력 블록이 아래로 이동할 수 있는지 확인
-        if (canMove(currentX + 1, currentY)) {
-            currentX++; // 이동 가능하면 아래로 이동
-            drawBlock(rotation); // 블록 다시 그리기
+        int[][] shape;
+        if (blockType == -2) { // 에린의 능력 블록
+            shape = new int[][] {
+                {1, 1},
+                {1, 1},
+                {1, 1},
+                {1, 1},
+            };
+        } else if (blockType == -1) { // 셀레나의 능력 블록 (1x1 하얀 블록)
+            shape = new int[][] { {1} };
         } else {
-            // 이동 불가능한 경우에만 블록 제거 및 다음 블록으로 전환
+            shape = SHAPE[blockType][rotation];
+        }
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1) {
+                    int x = currentX + i;
+                    int y = currentY + j;
+
+                    if (x >= 0 && x < 20 && y >= 0 && y < 10) {
+                        if (blockType == -1) {
+                            // 능력 블록인 경우 이미지 설정
+                            ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+                            setBlockImage(fireIcon, x, y);
+                        } else if(blockType == -2) {
+                            ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
+                            setBlockImage(swordIcon, x, y);
+                        }
+                        else {
+                            // 일반 블록인 경우 색상 설정
+                            cellLabels[x][y].setBackground(getColorForBlock(blockType));
+                            cellLabels[x][y].setIcon(null);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    // 블록 색을 설정하는 메소드
+    private Color getColorForBlock(int blockType) {
+        switch (blockType) {
+            case 0: return Color.CYAN;  // I
+            case 1: return Color.YELLOW; // O
+            case 2: return Color.GREEN;  // S
+            case 3: return Color.GRAY; // Z
+            case 4: return Color.BLUE;   // L
+            case 5: return Color.PINK;   // T
+            case 6: return Color.ORANGE; // J
+            default: return Color.WHITE; // 기본 값
+        }
+    }
+
+
+    // 블록을 아래로 이동
+    private void moveBlockDown() {
+
+        if (blockType == -1) { // Serena의 능력 블록일 경우
+            // 능력 블록이 아래로 이동할 수 있는지 확인
+            if (canMove(currentX + 1, currentY)) {
+                currentX++; // 이동 가능하면 아래로 이동
+                drawBlock(rotation); // 블록 다시 그리기
+            } else {
+                // 이동 불가능한 경우에만 블록 제거 및 다음 블록으로 전환
+                removeSurroundingBlocks(currentX, currentY);
+
+                blockType = nextBlockType;
+                Random rand = new Random();
+                nextBlockType = rand.nextInt(SHAPE.length); // 새 블록 랜덤 설정
+                showNextBlock(); // 다음 블록 표시
+                startFallingBlock(); // 새로운 블록 시작
+            }
+        } else if (blockType != -2){
+            // 일반 블록 처리
+            if (canMove(currentX + 1, currentY)) {
+                currentX++; // 이동 가능하면 아래로 이동
+                drawBlock(rotation);
+            } else {
+                fixBlock(); // 이동 불가능하면 블록 고정
+            }
+        }
+
+        if (blockType == -2) { // 에린의 능력 블록일 경우
+                // 이동 중 충돌한 블록을 삭제
+            deleteCollidedBlock(currentX, currentY);
+
+            // 아래로 이동 가능한지 확인
+            if (canMove(currentX + 1, currentY)) {
+                currentX++;
+                drawBlock(rotation); // 블록을 화면에 그리기
+            } else {
+                // 더 이상 이동 불가 -> 바닥 도달 시 능력 블록 제거
+                clearCurrentBlock();
+                abilityUsed = false; // 능력 초기화
+
+                // 다음 블록 생성
+                blockType = nextBlockType;
+                Random rand = new Random();
+                nextBlockType = rand.nextInt(SHAPE.length);
+                showNextBlock(); // 다음 블록 표시
+                startFallingBlock(); // 새로운 블록 시작
+                }
+        } else {
+            if (canMove(currentX + 1, currentY)) {
+                // 이동 가능하면 이동
+                currentX++;
+                drawBlock(rotation);
+        
+                // 능력 블록의 새로운 위치에 이미지 설정
+                if (blockType == -1) {
+                    ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+                    setBlockImage(fireIcon, currentX, currentY);
+                }
+            } else {
+                    fixBlock(); // 일반 블록은 고정
+                }
+            
+
+        }
+        
+    }
+
+
+
+    // 블록 이동 여부 체크
+    private boolean canMove(int x, int y) {
+        int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} }; // Serena 능력 블록의 모양
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1) {
+                    int newX = x + i;
+                    int newY = y + j;
+
+                    // 경계를 벗어나거나 고정된 블록과 충돌 여부 확인
+                    if (newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
+                        return false; // 이동 불가
+                    }
+                }
+            }
+        }
+        return true; // 이동 가능
+    }
+
+
+
+
+
+    // 블럭 생성 시 고정된 블럭과의 충돌 여부를 체크하여 게임 오버 상태를 결정하는 메소드
+    private boolean isGameOver() {
+        int[][] shape = SHAPE[blockType][rotation];
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1 && board[currentX + i][currentY + j] == 1) {
+                    // 게임 오버 상태에서 성녀 부활 기능 체크
+                    if (selectedCharacter.equals("루미엘") && !abilityUsed) {
+                        ruminel(); // 외부 클래스의 메서드 호출
+                        return false; // 게임 오버 방지
+                    }
+                    return true; // 부활 불가 시 게임 오버
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+    private void showOverlayImage(int durationMillis) {
+        overlayLabel.setVisible(true); // 이미지 표시
+        Timer timer = new Timer(durationMillis, e -> {
+            overlayLabel.setVisible(false); // 1초 후 숨김
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+
+
+    private void fixBlock() {
+        if (blockType == -1) {
+            // 능력 블록일 경우 주변 블록 제거
             removeSurroundingBlocks(currentX, currentY);
 
-            blockType = nextBlockType;
-            Random rand = new Random();
-            nextBlockType = rand.nextInt(SHAPE.length); // 새 블록 랜덤 설정
-            showNextBlock(); // 다음 블록 표시
-            startFallingBlock(); // 새로운 블록 시작
-        }
-    } else if (blockType != -2){
-        // 일반 블록 처리
-        if (canMove(currentX + 1, currentY)) {
-            currentX++; // 이동 가능하면 아래로 이동
-            drawBlock(rotation);
-        } else {
-            fixBlock(); // 이동 불가능하면 블록 고정
-        }
-    }
-
-    if (blockType == -2) { // 에린의 능력 블록일 경우
-            // 이동 중 충돌한 블록을 삭제
-        deleteCollidedBlock(currentX, currentY);
-
-        // 아래로 이동 가능한지 확인
-        if (canMove(currentX + 1, currentY)) {
-            currentX++;
-            drawBlock(rotation); // 블록을 화면에 그리기
-        } else {
-            // 더 이상 이동 불가 -> 바닥 도달 시 능력 블록 제거
-            clearCurrentBlock();
-            abilityUsed = false; // 능력 초기화
-
-            // 다음 블록 생성
+            // 새로운 블록 시작
             blockType = nextBlockType;
             Random rand = new Random();
             nextBlockType = rand.nextInt(SHAPE.length);
             showNextBlock(); // 다음 블록 표시
             startFallingBlock(); // 새로운 블록 시작
+            return; // 이후 일반 블록 고정 로직 실행하지 않음
+        }
+
+        // 일반 블록 고정
+        int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1) {
+                    board[currentX + i][currentY + j] = 1;
+                    cellLabels[currentX + i][currentY + j].setBackground(currentColor);
+                }
             }
-    } else {
-        if (canMove(currentX + 1, currentY)) {
-            // 이동 가능하면 이동
-            currentX++;
-            drawBlock(rotation);
-    
-            // 능력 블록의 새로운 위치에 이미지 설정
-            if (blockType == -1) {
-                ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-                setBlockImage(fireIcon, currentX, currentY);
-            }
+        }
+
+        clearFullLines(); // 줄 삭제 확인
+
+        // 블록 내려온 시간 측정 및 점수 계산
+        long blockEndTime = System.currentTimeMillis();
+        long elapsedTime = (blockEndTime - blockStartTime) / 1000; // 초 단위로 변환
+            
+        if (elapsedTime <= 0.5) {
+            totalScore += 5;
+        } else if (elapsedTime <= 1) {
+            totalScore += 3;
         } else {
-                fixBlock(); // 일반 블록은 고정
-            }
+            totalScore += 1;
+        }
+        //String.format("블록: %d / %d", clearedBlocks, totalBlocks)
+        scoreLabel.setText(String.format("<html>현재점수/최고점수<br> %d / %d", totalScore, highestScore));
+
+        holdUsed = false; // 홀드 사용 가능 상태 초기화
+
+        clearedBlocks++;
+        updateProgress();
+
         
 
-    }
-    
-}
+        if (clearedBlocks >= totalBlocks) {
+            timer.stop();
+            countdownTimer.stop();
+            handleRewards(currentDifficulty);
+            resetGame();
+            return;
+        }
 
+        // 방향키 잠금 활성화 조건
+        if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
+            int randomInt = (int) (Math.random() * 2) + 1; // 1에서 10 사이의 정수
+            if (randomInt == 1) {
+                isDirectionLocked = true; // 방향키 잠금
+                lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
+            } else if (randomInt == 2) {
+                generateRandomObstacle();
+            }
+            
+            showOverlayImage(1000);
+            musicManager.playMusic("sings/devil_sound.wav");
 
-
-// 블록 이동 여부 체크
-private boolean canMove(int x, int y) {
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} }; // Serena 능력 블록의 모양
-
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                int newX = x + i;
-                int newY = y + j;
-
-                // 경계를 벗어나거나 고정된 블록과 충돌 여부 확인
-                if (newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
-                    return false; // 이동 불가
+            musicManager.clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    musicManager.playMusic(getBackgroundMusic());
                 }
+            });
+        }
+        
+        // 잠금 상태에서 떨어진 블록 카운트
+        if (isDirectionLocked) {
+            lockedBlocksCount++;
+            if (lockedBlocksCount > 2) {
+                isDirectionLocked = false; // 블록 2개가 떨어지면 잠금 해제
             }
         }
-    }
-    return true; // 이동 가능
-}
+        
 
-
-
-
-
-// 블럭 생성 시 고정된 블럭과의 충돌 여부를 체크하여 게임 오버 상태를 결정하는 메소드
-private boolean isGameOver() {
-    int[][] shape = SHAPE[blockType][rotation];
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1 && board[currentX + i][currentY + j] == 1) {
-                // 게임 오버 상태에서 성녀 부활 기능 체크
-                if (selectedCharacter.equals("루미엘") && !abilityUsed) {
-                    ruminel(); // 외부 클래스의 메서드 호출
-                    return false; // 게임 오버 방지
-                }
-                return true; // 부활 불가 시 게임 오버
-            }
-        }
-    }
-    return false;
-}
-
-
-
-private void showOverlayImage(int durationMillis) {
-    overlayLabel.setVisible(true); // 이미지 표시
-    Timer timer = new Timer(durationMillis, e -> {
-        overlayLabel.setVisible(false); // 1초 후 숨김
-    });
-    timer.setRepeats(false);
-    timer.start();
-}
-
-
-
-private void fixBlock() {
-    if (blockType == -1) {
-        // 능력 블록일 경우 주변 블록 제거
-        removeSurroundingBlocks(currentX, currentY);
-
-        // 새로운 블록 시작
-        blockType = nextBlockType;
+        blockType = nextBlockType; // 현재 블록을 다음 블록으로 설정
         Random rand = new Random();
         nextBlockType = rand.nextInt(SHAPE.length);
-        showNextBlock(); // 다음 블록 표시
+
+        showNextBlock(); // 다음 블록 UI 갱신
         startFallingBlock(); // 새로운 블록 시작
-        return; // 이후 일반 블록 고정 로직 실행하지 않음
     }
 
-    // 일반 블록 고정
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+    // 랜덤 이미지 배치하는 함수
+    private void generateRandomObstacle() {
+        Random rand = new Random();
 
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                board[currentX + i][currentY + j] = 1;
-                cellLabels[currentX + i][currentY + j].setBackground(currentColor);
+        // 모든 블록을 2칸 위로 이동
+        for (int y = 2; y < 20; y++) { // 아래에서 위로 이동
+            for (int x = 0; x < 10; x++) {
+                board[y - 2][x] = board[y][x];
+                cellLabels[y - 2][x].setBackground(cellLabels[y][x].getBackground());
+                cellLabels[y][x].setBackground(Color.BLACK); // 기존 위치 초기화
+                board[y][x] = 0;
+            }
+        }
+
+        // 두 줄의 빨간색 장애물 생성
+        for (int y = 18; y < 20; y++) { // 하단 두 줄(18, 19)
+            int emptyIndex = rand.nextInt(10); // 각 줄에 1x1 빈 자리 생성
+            for (int x = 0; x < 10; x++) {
+                if (x == emptyIndex) {
+                    // 빈 칸 설정
+                    board[y][x] = 0;
+                    cellLabels[y][x].setBackground(Color.BLACK);
+                } else {
+                    // 빨간색 블록 설정
+                    board[y][x] = 1;
+                    cellLabels[y][x].setBackground(Color.RED);
+                }
             }
         }
     }
 
-    clearFullLines(); // 줄 삭제 확인
 
-    // 블록 내려온 시간 측정 및 점수 계산
-    long blockEndTime = System.currentTimeMillis();
-    long elapsedTime = (blockEndTime - blockStartTime) / 1000; // 초 단위로 변환
+    // 진행 상황 라벨 업데이트
+    private void updateProgress() {
+        progressLabel.setText(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
+    }
+
+    // 게임 재시작을 위한 메소드 수정
+    private void resetGame() {
+        musicManager.stopMusic();
         
-    if (elapsedTime <= 0.5) {
-        totalScore += 5;
-    } else if (elapsedTime <= 1) {
-        totalScore += 3;
-    } else {
-        totalScore += 1;
-    }
-    //String.format("블록: %d / %d", clearedBlocks, totalBlocks)
-    scoreLabel.setText(String.format("<html>현재점수/최고점수<br> %d / %d", totalScore, highestScore));
-
-    holdUsed = false; // 홀드 사용 가능 상태 초기화
-
-    clearedBlocks++;
-    updateProgress();
-
-    
-
-    if (clearedBlocks >= totalBlocks) {
-        timer.stop();
-        countdownTimer.stop();
-        handleRewards(currentDifficulty);
-        resetGame();
-        return;
-    }
-
-    // 방향키 잠금 활성화 조건
-    if ((clearedBlocks == 20 || clearedBlocks == 40 || clearedBlocks == 60) && !isDirectionLocked) {
-        int randomInt = (int) (Math.random() * 2) + 1; // 1에서 10 사이의 정수
-        if (randomInt == 1) {
-            isDirectionLocked = true; // 방향키 잠금
-            lockedBlocksCount = 0;    // 잠금 상태에서 떨어진 블록 개수 초기화
-        } else if (randomInt == 2) {
-            generateRandomObstacle();
+        // 제한시간 초기화
+        remainingTime = 180;
+        abilityUsed = false;
+        // 제한시간 타이머 중지
+        if (countdownTimer != null) {
+            countdownTimer.stop();
+            countdownTimer = null; // 이전 타이머 해제
         }
-        
-        showOverlayImage(1000);
-        musicManager.playMusic("sings/devil_sound.wav");
 
+        // 게임 타이머 중지
+        if (timer != null) {
+            timer.stop();
+            timer = null; // 이전 타이머 해제
+        }
+
+        // 게임 보드 초기화
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                board[i][j] = 0;
+                cellLabels[i][j].setBackground(Color.BLACK); // 보드 색 초기화
+            }
+        }
+
+        // 다음 블록 라벨 초기화
+        if (nextBlockLabel != null) {
+            nextBlockLabel.removeAll();
+            nextBlockLabel.revalidate();
+            nextBlockLabel.repaint();
+        }
+
+        // 메인 화면으로 돌아가기
+        getContentPane().removeAll();
+        getContentPane().add(label);
+        startButton.setVisible(true);
+        exitButton.setVisible(true);
+
+        if (easyButton != null) easyButton.setVisible(false);
+        if (mediumButton != null) mediumButton.setVisible(false);
+        if (hardButton != null) hardButton.setVisible(false);
+
+        abilityUsed = false; 
+
+        revalidate();
+        repaint();
+    }
+
+    private void handleRewards(int difficulty) {
+        if (difficulty == 1 && !isEasyCleared) {
+            isEasyCleared = true;
+            JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 10000, 정수: 250\n 칭호 : <하의 정복자>", "Easy 보상", JOptionPane.INFORMATION_MESSAGE);
+        } else if (difficulty == 2 && !isMediumCleared) {
+            isMediumCleared = true;
+            JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 20000, 정수: 500\n 칭호 : <중의 정복자>", "Medium 보상", JOptionPane.INFORMATION_MESSAGE);
+        } else if (difficulty == 3 && !isHardCleared) {
+            isHardCleared = true;
+            JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 30000, 정수: 750\n 칭호 : <상의 정복자>", "Hard 보상", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "이미 정복한 난이도입니다. 보상이 지급되지 않습니다.", "알림", JOptionPane.WARNING_MESSAGE);
+        }
+
+        if (isEasyCleared && isMediumCleared && isHardCleared) {
+            JOptionPane.showMessageDialog(this, "축하합니다! 모든 난이도를 정복했습니다! 칭호: '완전한 정복자'", "정복자 칭호", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "에린파티의 서브 스토리가 해금되었습니다.", "스토리 해금", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void erin() {
+        if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+        musicManager.playMusic("sings/knife.wav");
+
+        // 효과음 종료 후 배경음악 재생
         musicManager.clip.addLineListener(event -> {
             if (event.getType() == LineEvent.Type.STOP) {
                 musicManager.playMusic(getBackgroundMusic());
             }
         });
-    }
-    
-    // 잠금 상태에서 떨어진 블록 카운트
-    if (isDirectionLocked) {
-        lockedBlocksCount++;
-        if (lockedBlocksCount > 2) {
-            isDirectionLocked = false; // 블록 2개가 떨어지면 잠금 해제
-        }
-    }
-    
 
-    blockType = nextBlockType; // 현재 블록을 다음 블록으로 설정
-    Random rand = new Random();
-    nextBlockType = rand.nextInt(SHAPE.length);
+        // 기존 블록 제거
+        clearCurrentBlock();
 
-    showNextBlock(); // 다음 블록 UI 갱신
-    startFallingBlock(); // 새로운 블록 시작
-}
+        // 능력 블록 생성
+        blockType = -2; // 에린 특수 블록 타입
+        rotation = 0;
+        currentX = 0; // 최상단에서 시작
+        currentY = 3; // 중앙 정렬
 
-// 랜덤 이미지 배치하는 함수
-private void generateRandomObstacle() {
-    Random rand = new Random();
+        ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
+        setBlockImage(swordIcon, currentX, currentY);
 
-    // 모든 블록을 2칸 위로 이동
-    for (int y = 2; y < 20; y++) { // 아래에서 위로 이동
-        for (int x = 0; x < 10; x++) {
-            board[y - 2][x] = board[y][x];
-            cellLabels[y - 2][x].setBackground(cellLabels[y][x].getBackground());
-            cellLabels[y][x].setBackground(Color.BLACK); // 기존 위치 초기화
-            board[y][x] = 0;
-        }
+        // 능력 블록 화면 표시
+        drawBlock(rotation);
+
+        abilityUsed = true; // 능력 사용 상태 갱신
+        abilitylabel.setVisible(false); // 능력 버튼 숨김
     }
 
-    // 두 줄의 빨간색 장애물 생성
-    for (int y = 18; y < 20; y++) { // 하단 두 줄(18, 19)
-        int emptyIndex = rand.nextInt(10); // 각 줄에 1x1 빈 자리 생성
-        for (int x = 0; x < 10; x++) {
-            if (x == emptyIndex) {
-                // 빈 칸 설정
-                board[y][x] = 0;
-                cellLabels[y][x].setBackground(Color.BLACK);
-            } else {
-                // 빨간색 블록 설정
-                board[y][x] = 1;
-                cellLabels[y][x].setBackground(Color.RED);
-            }
-        }
-    }
-}
 
+    private void deleteCollidedBlock(int x, int y) {
+        // 에린의 능력 블록 크기 (4x2)
+        int[][] erinBlockShape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1,1},{1,1},{1,1},{1,1} };
 
-// 진행 상황 라벨 업데이트
-private void updateProgress() {
-    progressLabel.setText(String.format("블록: %d / %d", clearedBlocks, totalBlocks));
-}
+        for (int i = 0; i < erinBlockShape.length; i++) {
+            for (int j = 0; j < erinBlockShape[i].length; j++) {
+                if (erinBlockShape[i][j] == 1) {
+                    int checkX = x + i; // 현재 X 위치
+                    int checkY = y + j; // 현재 Y 위치
 
-// 게임 재시작을 위한 메소드 수정
-private void resetGame() {
-    musicManager.stopMusic();
-    
-    // 제한시간 초기화
-    remainingTime = 180;
-    abilityUsed = false;
-    // 제한시간 타이머 중지
-    if (countdownTimer != null) {
-        countdownTimer.stop();
-        countdownTimer = null; // 이전 타이머 해제
-    }
-
-    // 게임 타이머 중지
-    if (timer != null) {
-        timer.stop();
-        timer = null; // 이전 타이머 해제
-    }
-
-    // 게임 보드 초기화
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 10; j++) {
-            board[i][j] = 0;
-            cellLabels[i][j].setBackground(Color.BLACK); // 보드 색 초기화
-        }
-    }
-
-    // 다음 블록 라벨 초기화
-    if (nextBlockLabel != null) {
-        nextBlockLabel.removeAll();
-        nextBlockLabel.revalidate();
-        nextBlockLabel.repaint();
-    }
-
-    // 메인 화면으로 돌아가기
-    getContentPane().removeAll();
-    getContentPane().add(label);
-    startButton.setVisible(true);
-    exitButton.setVisible(true);
-
-    if (easyButton != null) easyButton.setVisible(false);
-    if (mediumButton != null) mediumButton.setVisible(false);
-    if (hardButton != null) hardButton.setVisible(false);
-
-    abilityUsed = false; 
-
-    revalidate();
-    repaint();
-}
-
-private void handleRewards(int difficulty) {
-    if (difficulty == 1 && !isEasyCleared) {
-        isEasyCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 10000, 정수: 250\n 칭호 : <하의 정복자>", "Easy 보상", JOptionPane.INFORMATION_MESSAGE);
-    } else if (difficulty == 2 && !isMediumCleared) {
-        isMediumCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 20000, 정수: 500\n 칭호 : <중의 정복자>", "Medium 보상", JOptionPane.INFORMATION_MESSAGE);
-    } else if (difficulty == 3 && !isHardCleared) {
-        isHardCleared = true;
-        JOptionPane.showMessageDialog(this, "축하합니다! \n골드: 30000, 정수: 750\n 칭호 : <상의 정복자>", "Hard 보상", JOptionPane.INFORMATION_MESSAGE);
-    } else {
-        JOptionPane.showMessageDialog(this, "이미 정복한 난이도입니다. 보상이 지급되지 않습니다.", "알림", JOptionPane.WARNING_MESSAGE);
-    }
-
-    if (isEasyCleared && isMediumCleared && isHardCleared) {
-        JOptionPane.showMessageDialog(this, "축하합니다! 모든 난이도를 정복했습니다! 칭호: '완전한 정복자'", "정복자 칭호", JOptionPane.INFORMATION_MESSAGE);
-        JOptionPane.showMessageDialog(this, "에린파티의 서브 스토리가 해금되었습니다.", "스토리 해금", JOptionPane.INFORMATION_MESSAGE);
-    }
-}
-
-private void erin() {
-    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
-    musicManager.playMusic("sings/knife.wav");
-
-    // 효과음 종료 후 배경음악 재생
-    musicManager.clip.addLineListener(event -> {
-        if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusic());
-        }
-    });
-
-    // 기존 블록 제거
-    clearCurrentBlock();
-
-    // 능력 블록 생성
-    blockType = -2; // 에린 특수 블록 타입
-    rotation = 0;
-    currentX = 0; // 최상단에서 시작
-    currentY = 3; // 중앙 정렬
-
-    ImageIcon swordIcon = new ImageIcon("images/ability/sword.png");
-    setBlockImage(swordIcon, currentX, currentY);
-
-    // 능력 블록 화면 표시
-    drawBlock(rotation);
-
-    abilityUsed = true; // 능력 사용 상태 갱신
-    abilitylabel.setVisible(false); // 능력 버튼 숨김
-}
-
-
-private void deleteCollidedBlock(int x, int y) {
-    // 에린의 능력 블록 크기 (4x2)
-    int[][] erinBlockShape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1,1},{1,1},{1,1},{1,1} };
-
-    for (int i = 0; i < erinBlockShape.length; i++) {
-        for (int j = 0; j < erinBlockShape[i].length; j++) {
-            if (erinBlockShape[i][j] == 1) {
-                int checkX = x + i; // 현재 X 위치
-                int checkY = y + j; // 현재 Y 위치
-
-                // 보드 범위를 벗어나지 않도록 체크
-                if (checkX >= 0 && checkX < 20 && checkY >= 0 && checkY < 10) {
-                    if (board[checkX][checkY] == 1) { // 고정된 블록이 있다면
-                        board[checkX][checkY] = 0; // 보드에서 제거
-                        cellLabels[checkX][checkY].setBackground(Color.BLACK); // UI 초기화
-                        cellLabels[checkX][checkY].setIcon(null); // 아이콘 제거
+                    // 보드 범위를 벗어나지 않도록 체크
+                    if (checkX >= 0 && checkX < 20 && checkY >= 0 && checkY < 10) {
+                        if (board[checkX][checkY] == 1) { // 고정된 블록이 있다면
+                            board[checkX][checkY] = 0; // 보드에서 제거
+                            cellLabels[checkX][checkY].setBackground(Color.BLACK); // UI 초기화
+                            cellLabels[checkX][checkY].setIcon(null); // 아이콘 제거
+                        }
                     }
                 }
             }
         }
     }
-}
 
-private void reon() {
-    if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
-    musicManager.playMusic("sings/knife2.wav");
-
-    musicManager.clip.addLineListener(event -> {
-        if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusic());
-        }
-    });
-
-    // 가장 높은 블록과 낮은 블록의 Y 좌표를 찾기
-    int highestBlock = 19; // 초기값: 가장 낮은 위치
-    int lowestBlock = 0;   // 초기값: 가장 높은 위치
-
-    for (int i = 0; i < 20; i++) { // 위에서부터 검사
-        for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 1) {
-                highestBlock = Math.min(highestBlock, i); // 가장 높은 블록 갱신
-                lowestBlock = Math.max(lowestBlock, i);  // 가장 낮은 블록 갱신
-            }
-        }
-    }
-
-    // 블록의 범위를 확인하여 절반 계산
-    int midRow = (highestBlock + lowestBlock) / 2;
-    if ((highestBlock + lowestBlock) % 2 != 0) midRow++; // 홀수인 경우 올림 처리
-
-    // 하단 절반 제거
-    for (int i = midRow; i <= lowestBlock; i++) {
-        for (int j = 0; j < 10; j++) {
-            board[i][j] = 0; // 데이터 초기화
-            cellLabels[i][j].setBackground(Color.BLACK); // 라벨 초기화
-        }
-    }
-
-    // 상단 블록을 아래로 이동
-    int rowsToMove = lowestBlock - midRow + 1; // 하단 제거된 줄 수 계산
-    for (int i = midRow - 1; i >= 0; i--) {
-        for (int j = 0; j < 10; j++) {
-            board[i + rowsToMove][j] = board[i][j]; // 아래로 이동
-            cellLabels[i + rowsToMove][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
-
-            board[i][j] = 0; // 원래 위치 초기화
-            cellLabels[i][j].setBackground(Color.BLACK);
-        }
-    }
-
-    // 게임 화면 숨기기 (gameLabel)
-    gameLabel.setVisible(false);
-
-    // 방패 이미지를 덮기 위한 JLabel 생성
-    JLabel shieldLabel = new JLabel();
-    shieldLabel.setIcon(new ImageIcon("images/ability/shield_icon.png"));
-    shieldLabel.setBounds(gameLabel.getBounds()); // gameLabel과 같은 위치에 설정
-    shieldLabel.setOpaque(false); // 배경을 투명하게 설정
-
-    // easyLabel에 방패 이미지 추가
-    easyLabel.add(shieldLabel);
-    easyLabel.revalidate(); 
-    easyLabel.repaint();   
-
-    // 항상 0.5초 동안 방패 이미지가 보이도록 설정
-    int shieldTime = 500; // 0.5초 (500ms)
-
-    // 지정된 시간 후 방패 이미지 제거하고 gameLabel 다시 보이게 하기
-    new Timer(shieldTime, e -> {
-        easyLabel.remove(shieldLabel); // 방패 이미지 제거
-        gameLabel.setVisible(true);     // gameLabel 다시 보이게 하기
-        easyLabel.revalidate();         // 레이아웃 갱신
-        easyLabel.repaint();            // 화면 갱신
-    }).start();
-
-    // 능력 발동 후 abilitylabel 숨김
-    abilitylabel.setVisible(false);
-
-    abilityUsed = true; // 능력 사용 처리
-}
-
-
-private void serena() {
-    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
-    musicManager.playMusic("sings/wizard.wav");
-
-    musicManager.clip.addLineListener(event -> {
-        if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusic());
-        }
-    });
-
-    // 현재 블록 삭제
-    clearCurrentBlock();
-
-    // 능력 블록 설정
-    blockType = -1; // Serena의 특수 블록 타입
-    rotation = 0;
-    currentX = 0; // 화면 최상단
-    currentY = 4; // 중앙에서 시작
-
-    // 능력 블록 이미지 설정
-    ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
-    setBlockImage(fireIcon, currentX, currentY);
-
-    // 능력 사용 처리
-    abilityUsed = true;
-    abilitylabel.setVisible(false); // 능력 버튼 숨김
-}
-
-
-private void clearCurrentBlock() {
-    int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
-
-    for (int i = 0; i < shape.length; i++) {
-        for (int j = 0; j < shape[i].length; j++) {
-            if (shape[i][j] == 1) {
-                int x = currentX + i;
-                int y = currentY + j;
-
-                if (x >= 0 && x < 20 && y >= 0 && y < 10) {
-                    board[x][y] = 0; // 보드 데이터 초기화
-                    cellLabels[x][y].setBackground(Color.BLACK); // 색상 초기화
-                    cellLabels[x][y].setIcon(null); // 이미지 제거
-                }
-            }
-        }
-    }
-}
-
-private void setBlockImage(ImageIcon icon, int x, int y) {
-    Image img = icon.getImage();
-    int width = cellLabels[0][0].getWidth(); // 블록 크기에 맞춤
-    int height = cellLabels[0][0].getHeight();
-    Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-    icon = new ImageIcon(scaledImg);
-
-    // 셀에 이미지 설정
-    cellLabels[x][y].setIcon(icon);
-    cellLabels[x][y].setBackground(null); // 배경 제거
-}
-
-
-// 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거
-private void removeSurroundingBlocks(int centerX, int centerY) {
-    int startX = Math.max(centerX - 2, 0);
-    int endX = Math.min(centerX + 2, 19);
-    int startY = Math.max(centerY - 2, 0);
-    int endY = Math.min(centerY + 2, 9);
-
-    for (int i = startX; i <= endX; i++) {
-        for (int j = startY; j <= endY; j++) {
-            board[i][j] = 0; // 보드 데이터 초기화
-            cellLabels[i][j].setBackground(Color.BLACK); // 색상 초기화
-            cellLabels[i][j].setIcon(null); // 이미지 제거
-        }
-    }
-
-    // 능력 블록도 제거
-    board[centerX][centerY] = 0;
-    cellLabels[centerX][centerY].setBackground(Color.BLACK);
-    cellLabels[centerX][centerY].setIcon(null);
-}
-
-
-
-private void ruminel() {
-    if (!abilityUsed) { // 부활 가능 여부 확인
-        musicManager.playMusic("sings/nun.wav");
-        for (int i = 0; i < 15; i++) { // 상단 10줄 제거
-            for (int j = 0; j < 10; j++) {
-                board[i][j] = 0; // 보드 데이터 초기화
-                cellLabels[i][j].setBackground(Color.BLACK); // 라벨 색상 초기화
-            }
-        }
+    private void reon() {
+        if (abilityUsed) return; // 이미 능력을 사용했다면 실행되지 않음
+        musicManager.playMusic("sings/knife2.wav");
 
         musicManager.clip.addLineListener(event -> {
             if (event.getType() == LineEvent.Type.STOP) {
@@ -1179,60 +1010,229 @@ private void ruminel() {
             }
         });
 
-        // 능력 라벨 숨기기
+        // 가장 높은 블록과 낮은 블록의 Y 좌표를 찾기
+        int highestBlock = 19; // 초기값: 가장 낮은 위치
+        int lowestBlock = 0;   // 초기값: 가장 높은 위치
+
+        for (int i = 0; i < 20; i++) { // 위에서부터 검사
+            for (int j = 0; j < 10; j++) {
+                if (board[i][j] == 1) {
+                    highestBlock = Math.min(highestBlock, i); // 가장 높은 블록 갱신
+                    lowestBlock = Math.max(lowestBlock, i);  // 가장 낮은 블록 갱신
+                }
+            }
+        }
+
+        // 블록의 범위를 확인하여 절반 계산
+        int midRow = (highestBlock + lowestBlock) / 2;
+        if ((highestBlock + lowestBlock) % 2 != 0) midRow++; // 홀수인 경우 올림 처리
+
+        // 하단 절반 제거
+        for (int i = midRow; i <= lowestBlock; i++) {
+            for (int j = 0; j < 10; j++) {
+                board[i][j] = 0; // 데이터 초기화
+                cellLabels[i][j].setBackground(Color.BLACK); // 라벨 초기화
+            }
+        }
+
+        // 상단 블록을 아래로 이동
+        int rowsToMove = lowestBlock - midRow + 1; // 하단 제거된 줄 수 계산
+        for (int i = midRow - 1; i >= 0; i--) {
+            for (int j = 0; j < 10; j++) {
+                board[i + rowsToMove][j] = board[i][j]; // 아래로 이동
+                cellLabels[i + rowsToMove][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
+
+                board[i][j] = 0; // 원래 위치 초기화
+                cellLabels[i][j].setBackground(Color.BLACK);
+            }
+        }
+
+        // 게임 화면 숨기기 (gameLabel)
+        gameLabel.setVisible(false);
+
+        // 방패 이미지를 덮기 위한 JLabel 생성
+        JLabel shieldLabel = new JLabel();
+        shieldLabel.setIcon(new ImageIcon("images/ability/shield_icon.png"));
+        shieldLabel.setBounds(gameLabel.getBounds()); // gameLabel과 같은 위치에 설정
+        shieldLabel.setOpaque(false); // 배경을 투명하게 설정
+
+        // easyLabel에 방패 이미지 추가
+        easyLabel.add(shieldLabel);
+        easyLabel.revalidate(); 
+        easyLabel.repaint();   
+
+        // 항상 0.5초 동안 방패 이미지가 보이도록 설정
+        int shieldTime = 500; // 0.5초 (500ms)
+
+        // 지정된 시간 후 방패 이미지 제거하고 gameLabel 다시 보이게 하기
+        new Timer(shieldTime, e -> {
+            easyLabel.remove(shieldLabel); // 방패 이미지 제거
+            gameLabel.setVisible(true);     // gameLabel 다시 보이게 하기
+            easyLabel.revalidate();         // 레이아웃 갱신
+            easyLabel.repaint();            // 화면 갱신
+        }).start();
+
+        // 능력 발동 후 abilitylabel 숨김
         abilitylabel.setVisible(false);
 
-        // 부활 상태 기록
-        abilityUsed = true;
-
-        // UI 갱신
-        revalidate();
-        repaint();
-
-        JOptionPane.showMessageDialog(Tetris.this, "성녀의 부활 능력이 발동되었습니다!", "부활", JOptionPane.INFORMATION_MESSAGE);
-
-        // 새로운 블록 시작
-        startFallingBlock();
+        abilityUsed = true; // 능력 사용 처리
     }
-}
 
 
+    private void serena() {
+        if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+        musicManager.playMusic("sings/wizard.wav");
 
-private void sily() {
-    if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
-    abilitylabel.setVisible(false); // 기존 능력 관련 레이블 숨김
+        musicManager.clip.addLineListener(event -> {
+            if (event.getType() == LineEvent.Type.STOP) {
+                musicManager.playMusic(getBackgroundMusic());
+            }
+        });
 
-    musicManager.playMusic("sings/slime_sound.wav");
+        // 현재 블록 삭제
+        clearCurrentBlock();
 
-    musicManager.clip.addLineListener(event -> {
-        if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusic());
-        }
-    });
+        // 능력 블록 설정
+        blockType = -1; // Serena의 특수 블록 타입
+        rotation = 0;
+        currentX = 0; // 화면 최상단
+        currentY = 4; // 중앙에서 시작
 
-    // 슬라임 캐릭터 이미지를 red_slime 이미지로 변경
-    ImageIcon redSlimeIcon = new ImageIcon("images/ability/red_slime.png"); // 새로운 이미지 로드
-    Image img = redSlimeIcon.getImage(); // 이미지 객체 가져오기
-    int width = chlabel.getWidth(); // chlabel의 너비 가져오기
-    int height = chlabel.getHeight(); // chlabel의 높이 가져오기
-    Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
-    redSlimeIcon = new ImageIcon(scaledImg); // 조정된 이미지를 다시 아이콘으로 저장
-    chlabel.setIcon(redSlimeIcon); // chlabel의 이미지를 새로운 이미지로 변경
+        // 능력 블록 이미지 설정
+        ImageIcon fireIcon = new ImageIcon("images/ability/fire.png");
+        setBlockImage(fireIcon, currentX, currentY);
 
-    abilityUsed = true;
-}
+        // 능력 사용 처리
+        abilityUsed = true;
+        abilitylabel.setVisible(false); // 능력 버튼 숨김
+    }
 
-// 보드를 초기화하여 화면을 비운다
-private void clearBoard() {
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 0) { // 고정된 블록은 초기화하지 않음
-                cellLabels[i][j].setBackground(Color.BLACK); // 빈 칸 초기화
-                cellLabels[i][j].setIcon(null); // 아이콘 초기화
+
+    private void clearCurrentBlock() {
+        int[][] shape = blockType >= 0 ? SHAPE[blockType][rotation] : new int[][] { {1} };
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1) {
+                    int x = currentX + i;
+                    int y = currentY + j;
+
+                    if (x >= 0 && x < 20 && y >= 0 && y < 10) {
+                        board[x][y] = 0; // 보드 데이터 초기화
+                        cellLabels[x][y].setBackground(Color.BLACK); // 색상 초기화
+                        cellLabels[x][y].setIcon(null); // 이미지 제거
+                    }
+                }
             }
         }
     }
-}
+
+    private void setBlockImage(ImageIcon icon, int x, int y) {
+        Image img = icon.getImage();
+        int width = cellLabels[0][0].getWidth(); // 블록 크기에 맞춤
+        int height = cellLabels[0][0].getHeight();
+        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        icon = new ImageIcon(scaledImg);
+
+        // 셀에 이미지 설정
+        cellLabels[x][y].setIcon(icon);
+        cellLabels[x][y].setBackground(null); // 배경 제거
+    }
+
+
+    // 특정 좌표 주변 2칸의 블록을 제거하고 능력 블록도 제거
+    private void removeSurroundingBlocks(int centerX, int centerY) {
+        int startX = Math.max(centerX - 2, 0);
+        int endX = Math.min(centerX + 2, 19);
+        int startY = Math.max(centerY - 2, 0);
+        int endY = Math.min(centerY + 2, 9);
+
+        for (int i = startX; i <= endX; i++) {
+            for (int j = startY; j <= endY; j++) {
+                board[i][j] = 0; // 보드 데이터 초기화
+                cellLabels[i][j].setBackground(Color.BLACK); // 색상 초기화
+                cellLabels[i][j].setIcon(null); // 이미지 제거
+            }
+        }
+
+        // 능력 블록도 제거
+        board[centerX][centerY] = 0;
+        cellLabels[centerX][centerY].setBackground(Color.BLACK);
+        cellLabels[centerX][centerY].setIcon(null);
+    }
+
+
+
+    private void ruminel() {
+        if (!abilityUsed) { // 부활 가능 여부 확인
+            musicManager.playMusic("sings/nun.wav");
+            for (int i = 0; i < 15; i++) { // 상단 10줄 제거
+                for (int j = 0; j < 10; j++) {
+                    board[i][j] = 0; // 보드 데이터 초기화
+                    cellLabels[i][j].setBackground(Color.BLACK); // 라벨 색상 초기화
+                }
+            }
+
+            musicManager.clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    musicManager.playMusic(getBackgroundMusic());
+                }
+            });
+
+            // 능력 라벨 숨기기
+            abilitylabel.setVisible(false);
+
+            // 부활 상태 기록
+            abilityUsed = true;
+
+            // UI 갱신
+            revalidate();
+            repaint();
+
+            JOptionPane.showMessageDialog(Tetris.this, "성녀의 부활 능력이 발동되었습니다!", "부활", JOptionPane.INFORMATION_MESSAGE);
+
+            // 새로운 블록 시작
+            startFallingBlock();
+        }
+    }
+
+
+
+    private void sily() {
+        if (abilityUsed) return; // 이미 능력을 사용했다면 실행하지 않음
+        abilitylabel.setVisible(false); // 기존 능력 관련 레이블 숨김
+
+        musicManager.playMusic("sings/slime_sound.wav");
+
+        musicManager.clip.addLineListener(event -> {
+            if (event.getType() == LineEvent.Type.STOP) {
+                musicManager.playMusic(getBackgroundMusic());
+            }
+        });
+
+        // 슬라임 캐릭터 이미지를 red_slime 이미지로 변경
+        ImageIcon redSlimeIcon = new ImageIcon("images/ability/red_slime.png"); // 새로운 이미지 로드
+        Image img = redSlimeIcon.getImage(); // 이미지 객체 가져오기
+        int width = chlabel.getWidth(); // chlabel의 너비 가져오기
+        int height = chlabel.getHeight(); // chlabel의 높이 가져오기
+        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 라벨 크기에 맞게 이미지 크기 조정
+        redSlimeIcon = new ImageIcon(scaledImg); // 조정된 이미지를 다시 아이콘으로 저장
+        chlabel.setIcon(redSlimeIcon); // chlabel의 이미지를 새로운 이미지로 변경
+
+        abilityUsed = true;
+    }
+
+    // 보드를 초기화하여 화면을 비운다
+    private void clearBoard() {
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (board[i][j] == 0) { // 고정된 블록은 초기화하지 않음
+                    cellLabels[i][j].setBackground(Color.BLACK); // 빈 칸 초기화
+                    cellLabels[i][j].setIcon(null); // 아이콘 초기화
+                }
+            }
+        }
+    }
 
     private void updateBackgroundImage() {
         int width = getWidth();
@@ -1294,144 +1294,144 @@ private void clearBoard() {
             }
         }
 
-        private void handleHoldBlock() {
-            if (holdUsed) return; // 이미 홀드를 사용한 경우 무시
-        
-            if (holdBlockType == -1) {
-                // 홀드가 비어있을 때: 현재 블록을 저장하고 새 블록 시작
-                holdBlockType = blockType; // 현재 블록 타입 저장
-                blockType = nextBlockType; // 다음 블록으로 교체
-                nextBlockType = new Random().nextInt(SHAPE.length); // 새로운 다음 블록 생성
-            } else {
-                // 홀드에 블록이 있을 때: 현재 블록과 홀드 블록 교체
-                int temp = blockType;
-                blockType = holdBlockType; // 홀드 블록을 현재 블록으로 설정
-                holdBlockType = temp; // 현재 블록을 홀드에 저장
-            }
-        
-            rotation = 0; // 홀드 블록은 기본 회전 상태로 시작
-            currentX = 0; // 초기 위치로 설정
-            currentY = 3;
-        
-            // 홀드 표시와 다음 블록 라벨 업데이트
-            updateHoldLabel();
-            showNextBlock(); // 다음 블록 갱신
-        
-            holdUsed = true; // 홀드 사용 처리
-        
-            // 새 블록 화면에 표시
-            drawBlock(rotation);
-        }
-        
-        private boolean canRotate(int nextRotation) {
-            int[][] shape = SHAPE[blockType][nextRotation]; // 회전 후의 블록 모양 가져오기
-        
-            for (int i = 0; i < shape.length; i++) {
-                for (int j = 0; j < shape[i].length; j++) {
-                    if (shape[i][j] == 1) {
-                        int newX = currentX + i;
-                        int newY = currentY + j;
-        
-                        // 경계를 벗어나거나 고정된 블록과 충돌하는지 확인
-                        if (newX < 0 || newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true; // 회전 가능하면 true 반환
-        }
-
-        private void updateHoldLabel() {
-            holdLabel.removeAll(); // 기존 블록 제거
-        
-            if (holdBlockType != -1) {
-                int[][] shape = SHAPE[holdBlockType][0]; // 홀드 블록은 기본 회전 상태로 보여줌
-        
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        JLabel cell = new JLabel();
-                        cell.setOpaque(true);
-                        if (shape[i][j] == 1) {
-                            cell.setBackground(getColorForBlock(holdBlockType)); // 블록 색상 설정
-                        } else {
-                            cell.setBackground(Color.BLACK); // 빈 칸은 검은색
-                        }
-                        holdLabel.add(cell);
-                    }
-                }
-            }
-        
-            holdLabel.revalidate();
-            holdLabel.repaint();
+    private void handleHoldBlock() {
+        if (holdUsed) return; // 이미 홀드를 사용한 경우 무시
+    
+        if (holdBlockType == -1) {
+            // 홀드가 비어있을 때: 현재 블록을 저장하고 새 블록 시작
+            holdBlockType = blockType; // 현재 블록 타입 저장
+            blockType = nextBlockType; // 다음 블록으로 교체
+            nextBlockType = new Random().nextInt(SHAPE.length); // 새로운 다음 블록 생성
+        } else {
+            // 홀드에 블록이 있을 때: 현재 블록과 홀드 블록 교체
+            int temp = blockType;
+            blockType = holdBlockType; // 홀드 블록을 현재 블록으로 설정
+            holdBlockType = temp; // 현재 블록을 홀드에 저장
         }
     
-        // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
-        private void dropBlockInstantly() {
-            if (blockType == -2) { // 에린 능력 블록인 경우
-                return;
-            } else {
-                // 일반 블록 처리
-                while (canMove(currentX + 1, currentY)) {
-                    currentX++; // 아래로 한 칸 내려감
+        rotation = 0; // 홀드 블록은 기본 회전 상태로 시작
+        currentX = 0; // 초기 위치로 설정
+        currentY = 3;
+    
+        // 홀드 표시와 다음 블록 라벨 업데이트
+        updateHoldLabel();
+        showNextBlock(); // 다음 블록 갱신
+    
+        holdUsed = true; // 홀드 사용 처리
+    
+        // 새 블록 화면에 표시
+        drawBlock(rotation);
+    }
+    
+    private boolean canRotate(int nextRotation) {
+        int[][] shape = SHAPE[blockType][nextRotation]; // 회전 후의 블록 모양 가져오기
+    
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] == 1) {
+                    int newX = currentX + i;
+                    int newY = currentY + j;
+    
+                    // 경계를 벗어나거나 고정된 블록과 충돌하는지 확인
+                    if (newX < 0 || newX >= 20 || newY < 0 || newY >= 10 || board[newX][newY] == 1) {
+                        return false;
+                    }
                 }
-                // 일반 블록 고정
-                fixBlock();
-                startFallingBlock();
+            }
+        }
+        return true; // 회전 가능하면 true 반환
+    }
+
+    private void updateHoldLabel() {
+        holdLabel.removeAll(); // 기존 블록 제거
+    
+        if (holdBlockType != -1) {
+            int[][] shape = SHAPE[holdBlockType][0]; // 홀드 블록은 기본 회전 상태로 보여줌
+    
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    JLabel cell = new JLabel();
+                    cell.setOpaque(true);
+                    if (shape[i][j] == 1) {
+                        cell.setBackground(getColorForBlock(holdBlockType)); // 블록 색상 설정
+                    } else {
+                        cell.setBackground(Color.BLACK); // 빈 칸은 검은색
+                    }
+                    holdLabel.add(cell);
+                }
+            }
+        }
+    
+        holdLabel.revalidate();
+        holdLabel.repaint();
+    }
+
+    // Z키 눌렀을 때, 블록이 바닥까지 빠르게 내려가도록 처리
+    private void dropBlockInstantly() {
+        if (blockType == -2) { // 에린 능력 블록인 경우
+            return;
+        } else {
+            // 일반 블록 처리
+            while (canMove(currentX + 1, currentY)) {
+                currentX++; // 아래로 한 칸 내려감
+            }
+            // 일반 블록 고정
+            fixBlock();
+            startFallingBlock();
+        }
+    }
+}
+
+        // 한 줄이 다 채워졌는지 확인하고, 채워졌으면 그 줄을 지우고 위의 줄을 내린다.
+    private void clearFullLines() {
+        List<Integer> fullLines = new ArrayList<>(); // 꽉 찬 줄의 인덱스 저장
+
+        // 모든 줄을 검사하여 꽉 찬 줄을 기록
+        for (int i = 0; i < 20; i++) {
+            boolean fullLine = true;
+            for (int j = 0; j < 10; j++) {
+                if (board[i][j] == 0) {
+                    fullLine = false;
+                    break;
+                }
+            }
+            if (fullLine) {
+                fullLines.add(i);
+            }
+        }
+
+        // 기록된 줄을 지우고 위의 줄을 내린다
+        for (int row : fullLines) {
+            removeLine(row); // 해당 줄을 제거
+        }
+
+        // 위의 줄을 아래로 내린다
+        for (int row : fullLines) {
+            moveDownFullLines(row);
+        }
+    }
+
+    // 해당 줄을 지우고, 그 줄을 위의 모든 줄을 내린다.
+    private void removeLine(int row) {
+        // 해당 줄을 지우고, 그 줄을 black으로 설정
+        for (int col = 0; col < 10; col++) {
+            board[row][col] = 0;
+            cellLabels[row][col].setBackground(Color.BLACK);
+        }
+    }
+
+    // 해당 줄 위에 있는 줄들을 한 칸씩 아래로 내린다.
+    private void moveDownFullLines(int row) {
+        for (int i = row - 1; i >= 0; i--) {
+            for (int j = 0; j < 10; j++) {
+                board[i + 1][j] = board[i][j]; // 위의 줄을 아래로 복사
+                cellLabels[i + 1][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
+
+                board[i][j] = 0; // 위의 줄은 초기화
+                cellLabels[i][j].setBackground(Color.BLACK);
             }
         }
     }
-
-    // 한 줄이 다 채워졌는지 확인하고, 채워졌으면 그 줄을 지우고 위의 줄을 내린다.
-private void clearFullLines() {
-    List<Integer> fullLines = new ArrayList<>(); // 꽉 찬 줄의 인덱스 저장
-
-    // 모든 줄을 검사하여 꽉 찬 줄을 기록
-    for (int i = 0; i < 20; i++) {
-        boolean fullLine = true;
-        for (int j = 0; j < 10; j++) {
-            if (board[i][j] == 0) {
-                fullLine = false;
-                break;
-            }
-        }
-        if (fullLine) {
-            fullLines.add(i);
-        }
-    }
-
-    // 기록된 줄을 지우고 위의 줄을 내린다
-    for (int row : fullLines) {
-        removeLine(row); // 해당 줄을 제거
-    }
-
-    // 위의 줄을 아래로 내린다
-    for (int row : fullLines) {
-        moveDownFullLines(row);
-    }
-}
-
-// 해당 줄을 지우고, 그 줄을 위의 모든 줄을 내린다.
-private void removeLine(int row) {
-    // 해당 줄을 지우고, 그 줄을 black으로 설정
-    for (int col = 0; col < 10; col++) {
-        board[row][col] = 0;
-        cellLabels[row][col].setBackground(Color.BLACK);
-    }
-}
-
-// 해당 줄 위에 있는 줄들을 한 칸씩 아래로 내린다.
-private void moveDownFullLines(int row) {
-    for (int i = row - 1; i >= 0; i--) {
-        for (int j = 0; j < 10; j++) {
-            board[i + 1][j] = board[i][j]; // 위의 줄을 아래로 복사
-            cellLabels[i + 1][j].setBackground(cellLabels[i][j].getBackground()); // 색상 이동
-
-            board[i][j] = 0; // 위의 줄은 초기화
-            cellLabels[i][j].setBackground(Color.BLACK);
-        }
-    }
-}
 
 
     public static void main(String[] args) {

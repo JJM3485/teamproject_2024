@@ -29,7 +29,7 @@ public class Tetris extends JFrame {
     private boolean holdUsed = false,abilityUsed = false,isDirectionLocked = false,check = false; // 현재 턴에서 이미 홀드를 사용했는지 체크
     private int remainingTime = 180; // 제한시간 (초 단위, 3분)
     private Timer countdownTimer;   // 제한시간을 관리하는 타이머
-    private int totalBlocks = 80,clearedBlocks = 0; // 전체 블록 수
+    private int totalBlocks = 70,clearedBlocks = 0; // 전체 블록 수
     private int totalScore = 0,highestScore = 0; // 총 점수
     private int currentDifficulty; // 1: 하, 2: 중, 3: 상
     private long blockStartTime;

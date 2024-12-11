@@ -44,7 +44,7 @@ public class Tetris extends JFrame {
     };
     private MusicManager musicManager = new MusicManager();
     // 현재 난이도에 맞는 배경음악 경로 반환
-    private String getBackgroundMusicForCurrentDifficulty() {
+    private String getBackgroundMusic() {
         return switch (currentDifficulty) {
             case 1 -> "sings/easy.wav";
             case 2 -> "sings/hard.wav";
@@ -827,7 +827,7 @@ private void fixBlock() {
 
         musicManager.clip.addLineListener(event -> {
             if (event.getType() == LineEvent.Type.STOP) {
-                musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+                musicManager.playMusic(getBackgroundMusic());
             }
         });
     }
@@ -963,7 +963,7 @@ private void erin() {
     // 효과음 종료 후 배경음악 재생
     musicManager.clip.addLineListener(event -> {
         if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            musicManager.playMusic(getBackgroundMusic());
         }
     });
 
@@ -1016,7 +1016,7 @@ private void reon() {
 
     musicManager.clip.addLineListener(event -> {
         if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            musicManager.playMusic(getBackgroundMusic());
         }
     });
 
@@ -1095,7 +1095,7 @@ private void serena() {
 
     musicManager.clip.addLineListener(event -> {
         if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            musicManager.playMusic(getBackgroundMusic());
         }
     });
 
@@ -1185,7 +1185,7 @@ private void ruminel() {
 
         musicManager.clip.addLineListener(event -> {
             if (event.getType() == LineEvent.Type.STOP) {
-                musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+                musicManager.playMusic(getBackgroundMusic());
             }
         });
 
@@ -1216,7 +1216,7 @@ private void sily() {
 
     musicManager.clip.addLineListener(event -> {
         if (event.getType() == LineEvent.Type.STOP) {
-            musicManager.playMusic(getBackgroundMusicForCurrentDifficulty());
+            musicManager.playMusic(getBackgroundMusic());
         }
     });
 

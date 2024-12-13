@@ -177,11 +177,11 @@ public class Tetris extends JFrame {
 
         mediumButton = new JButton("난이도 중");
         mediumButton.setBounds(350, 470, 100, 50);
-        mediumButton.addActionListener(e -> showCharacterSelection(200, 2));
+        mediumButton.addActionListener(e -> showCharacterSelection(250, 2));
 
         hardButton = new JButton("난이도 상");
         hardButton.setBounds(350, 540, 100, 50);
-        hardButton.addActionListener(e -> showCharacterSelection(100, 3));
+        hardButton.addActionListener(e -> showCharacterSelection(200, 3));
 
         label.add(easyButton);
         label.add(mediumButton);
@@ -825,7 +825,7 @@ public class Tetris extends JFrame {
         // 잠금 상태에서 떨어진 블록 카운트
         if (isDirectionLocked) {
             lockedBlocksCount++;
-            if (lockedBlocksCount > 2) {
+            if (lockedBlocksCount > 1) {
                 isDirectionLocked = false; // 블록 2개가 떨어지면 잠금 해제
             }
         }

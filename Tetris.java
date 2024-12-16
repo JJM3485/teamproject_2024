@@ -659,7 +659,6 @@ public class Tetris extends JFrame {
             } else {
                 // 더 이상 이동 불가 -> 바닥 도달 시 능력 블록 제거
                 clearCurrentBlock();
-                abilityUsed = false; // 능력 초기화
 
                 // 다음 블록 생성
                 blockType = nextBlockType;

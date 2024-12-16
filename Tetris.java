@@ -35,12 +35,13 @@ public class Tetris extends JFrame {
     private MusicManager musicManager = new MusicManager();
     // 현재 난이도에 맞는 배경음악 경로 반환
     private String getBackgroundMusic() {
-        return switch (currentDifficulty) {
-            case 1 -> "sings/easy.wav";
-            case 2 -> "sings/hard.wav";
-            case 3 -> "sings/normal.wav";
-            default -> null;
-        };
+        if (currentDifficulty == 1) {
+            return "sings/easy.wav";
+        } else if (currentDifficulty == 2) {
+            return "sings/normal.wav";
+        } else if (currentDifficulty == 3) {
+            return "sings/hard.wav";
+        } else {return null;}
     }
     
 
@@ -353,19 +354,9 @@ public class Tetris extends JFrame {
 
         musicManager.stopMusic(); // 기존 음악 정지
 
-                // 난이도에 따라 음악 파일 설정
-        String musicFilePath = switch (currentDifficulty) {
-            case 1 -> "sings/easy.wav";  // 난이도 하
-            case 2 -> "sings/hard.wav"; // 난이도 중
-            case 3 -> "sings/normal.wav";  // 난이도 상
-            default -> {
-                yield null; // null 반환 방지
-            }
-        };
-
                 // 음악 파일 경로가 유효하면 재생
-        if (musicFilePath != null) {
-            musicManager.playMusic(musicFilePath);
+        if (getBackgroundMusic() != null) {
+            musicManager.playMusic(getBackgroundMusic());
         }
 
         if (difficulty == 1) {
